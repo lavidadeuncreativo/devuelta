@@ -20,6 +20,8 @@ interface DigitalPassCardProps {
   showQR?: boolean;
   animated?: boolean;
   compact?: boolean;
+  logoUrl?: string;
+  stampIconUrl?: string;
 }
 
 export function DigitalPassCard({
@@ -37,6 +39,8 @@ export function DigitalPassCard({
   showQR = true,
   animated = true,
   compact = false,
+  logoUrl,
+  stampIconUrl,
 }: DigitalPassCardProps) {
   const progress = getProgressPercentage(currentValue, goalValue);
   const isVisitType = programType === 'visits';
@@ -72,19 +76,27 @@ export function DigitalPassCard({
       <div className={cn('relative z-10', compact ? 'p-5' : 'p-6 sm:p-8')}>
         {/* Header */}
         <div className="flex items-start justify-between mb-6">
-          <div>
-            <p
-              className="text-xs font-semibold uppercase tracking-[0.15em] mb-1"
-              style={{ color: `${textColor}88` }}
-            >
-              {businessName}
-            </p>
-            <h3 className={cn(
-              'font-semibold tracking-tight',
-              compact ? 'text-lg' : 'text-xl sm:text-2xl'
-            )}>
-              {programName}
-            </h3>
+          <div className="flex items-center gap-3">
+            {logoUrl && (
+              <div className={cn("rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-white/10", compact ? "w-10 h-10" : "w-12 h-12")}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div>
+              <p
+                className="text-xs font-semibold uppercase tracking-[0.15em] mb-1"
+                style={{ color: `${textColor}88` }}
+              >
+                {businessName}
+              </p>
+              <h3 className={cn(
+                'font-semibold tracking-tight',
+                compact ? 'text-lg' : 'text-xl sm:text-2xl'
+              )}>
+                {programName}
+              </h3>
+            </div>
           </div>
 
           {/* Reward status badge */}
@@ -148,20 +160,32 @@ export function DigitalPassCard({
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                        className="flex items-center justify-center"
                       >
-                        <Star
-                          size={compact ? 16 : 20}
-                          fill={textColor}
-                          color={textColor}
-                          className="drop-shadow-sm"
-                        />
+                        {stampIconUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={stampIconUrl} alt="stamp" className={compact ? "w-4 h-4 object-contain opacity-90" : "w-5 h-5 object-contain opacity-90"} />
+                        ) : (
+                          <Star
+                            size={compact ? 16 : 20}
+                            fill={textColor}
+                            color={textColor}
+                            className="drop-shadow-sm"
+                          />
+                        )}
                       </motion.div>
                     ) : (
                       <motion.div
                         key="empty"
                         style={{ color: `${textColor}25` }}
+                        className="flex items-center justify-center opacity-40"
                       >
-                        <Star size={compact ? 14 : 18} />
+                        {stampIconUrl ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={stampIconUrl} alt="stamp" className={compact ? "w-4 h-4 object-contain grayscale" : "w-5 h-5 object-contain grayscale"} />
+                        ) : (
+                          <Star size={compact ? 14 : 18} />
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>

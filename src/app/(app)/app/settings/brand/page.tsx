@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Upload, X } from 'lucide-react';
 import Link from 'next/link';
 import { demoBusiness } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
@@ -11,9 +11,18 @@ export default function BrandSettingsPage() {
   const [name, setName] = useState(demoBusiness.name);
   const [primaryColor, setPrimaryColor] = useState(demoBusiness.primaryColor);
   const [secondaryColor, setSecondaryColor] = useState(demoBusiness.secondaryColor || '#f0e6d3');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
+  const [stampIconUrl, setStampIconUrl] = useState<string | undefined>(undefined);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setter(URL.createObjectURL(file));
+    }
+  };
 
   return (
-    <div className="p-6 sm:p-8 max-w-4xl mx-auto">
+    <div className="p-6 sm:p-8 max-w-5xl mx-auto">
       <Link href="/app/settings" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] mb-6 transition-colors">
         <ArrowLeft size={14} /> Volver a configuración
       </Link>
@@ -29,52 +38,90 @@ export default function BrandSettingsPage() {
               <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre del negocio</label>
               <input type="text" className="input-field" value={name} onChange={e => setName(e.target.value)} />
             </div>
-            <div>
-              <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Logo</label>
-              <div className="border border-dashed border-[var(--color-border)] rounded-xl p-8 text-center">
-                <p className="text-sm text-[var(--color-text-muted)]">Arrastra tu logo aquí o haz clic para subir</p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">PNG, SVG — Máx. 2MB</p>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Logo del pase</label>
+                {logoUrl ? (
+                  <div className="relative border border-[var(--color-border)] rounded-xl aspect-square flex items-center justify-center bg-[var(--color-bg-secondary)] overflow-hidden group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                    <button onClick={() => setLogoUrl(undefined)} className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="border border-dashed border-[var(--color-border)] rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-brand)] hover:bg-[var(--color-brand)]/5 transition-colors">
+                    <Upload size={18} className="text-[var(--color-text-muted)] mb-2" />
+                    <span className="text-xs text-[var(--color-text-secondary)]">Subir logo</span>
+                    <input type="file" accept="image/png, image/jpeg, image/svg+xml" className="hidden" onChange={(e) => handleImageUpload(e, setLogoUrl)} />
+                  </label>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Ícono de sellos (Opcional)</label>
+                {stampIconUrl ? (
+                  <div className="relative border border-[var(--color-border)] rounded-xl aspect-square flex items-center justify-center bg-[var(--color-bg-secondary)] overflow-hidden group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={stampIconUrl} alt="Stamp" className="w-1/2 h-1/2 object-contain" />
+                    <button onClick={() => setStampIconUrl(undefined)} className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                      <X size={14} />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="border border-dashed border-[var(--color-border)] rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-brand)] hover:bg-[var(--color-brand)]/5 transition-colors">
+                    <Upload size={18} className="text-[var(--color-text-muted)] mb-2" />
+                    <span className="text-xs text-[var(--color-text-secondary)]">Subir ícono</span>
+                    <input type="file" accept="image/png, image/svg+xml" className="hidden" onChange={(e) => handleImageUpload(e, setStampIconUrl)} />
+                  </label>
+                )}
               </div>
             </div>
+            <p className="text-xs text-[var(--color-text-muted)]">Recomendamos PNG transparente o SVG. Tamaño máximo 2MB.</p>
           </div>
 
           <div className="card-surface p-6 space-y-4">
             <h3 className="text-sm font-semibold">Colores del pase</h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color principal</label>
+                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color principal (Fondo)</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
-                  <input type="text" className="input-field flex-1" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} />
+                  <input type="color" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
+                  <input type="text" className="input-field flex-1 text-sm" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color secundario</label>
+                <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color secundario (Texto)</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
-                  <input type="text" className="input-field flex-1" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} />
+                  <input type="color" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
+                  <input type="text" className="input-field flex-1 text-sm" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} />
                 </div>
               </div>
             </div>
           </div>
 
-          <button className="btn-primary"><Save size={15} /> Guardar cambios</button>
+          <button className="btn-primary w-full sm:w-auto"><Save size={15} /> Guardar cambios</button>
         </div>
 
         <div>
           <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Vista previa del pase</p>
-          <DigitalPassCard
-            businessName={name}
-            programName="Programa Demo"
-            customerName="Cliente Demo"
-            currentValue={3}
-            goalValue={5}
-            rewardDetail="Recompensa de ejemplo"
-            programType="visits"
-            bgColor={primaryColor}
-            textColor={secondaryColor}
-            animated={false}
-          />
+          <div className="sticky top-24">
+            <DigitalPassCard
+              businessName={name}
+              programName="Programa Demo"
+              customerName="Cliente Demo"
+              currentValue={3}
+              goalValue={5}
+              rewardDetail="Recompensa de ejemplo"
+              programType="visits"
+              bgColor={primaryColor}
+              textColor={secondaryColor}
+              animated={false}
+              logoUrl={logoUrl}
+              stampIconUrl={stampIconUrl}
+            />
+          </div>
         </div>
       </div>
     </div>
