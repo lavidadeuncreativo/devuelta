@@ -3,9 +3,10 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, UserPlus, MoreHorizontal, Shield } from 'lucide-react';
 import Link from 'next/link';
-import { demoUsers } from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
 
 export default function TeamSettingsPage() {
+  const { users } = useAppStore();
   return (
     <div className="p-6 sm:p-8 max-w-4xl mx-auto">
       <Link href="/app/settings" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] mb-6 transition-colors">
@@ -14,12 +15,12 @@ export default function TeamSettingsPage() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Equipo</h1>
-          <p className="text-sm text-[var(--color-text-secondary)] mt-1">{demoUsers.length} miembros del equipo.</p>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-1">{users.length} miembros del equipo.</p>
         </div>
         <button className="btn-primary"><UserPlus size={16} /> Invitar miembro</button>
       </div>
       <div className="space-y-3">
-        {demoUsers.map((user, i) => (
+        {users.map((user, i) => (
           <motion.div key={user.id} className="card-surface p-5 flex items-center gap-4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-sm font-bold text-white/90">
               {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}

@@ -29,6 +29,7 @@ interface AppState {
   rewards: Reward[];
   redemptions: Redemption[];
   auditLogs: AuditLog[];
+  users: User[];
 
   // For Demo/Dev
   settings: {
@@ -49,6 +50,8 @@ interface AppState {
   addRedemptionRecord: (redemption: Omit<Redemption, 'id' | 'redeemedAt'>) => void;
   addLocation: (location: Omit<BranchLocation, 'id' | 'createdAt'>) => void;
   addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>) => void;
+  setUsers: (users: User[]) => void;
+  addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
   resetDemoData: () => void;
 }
 
@@ -64,6 +67,7 @@ export const useAppStore = create<AppState>()(
       rewards: [],
       redemptions: [],
       auditLogs: [],
+      users: demoUsers,
       settings: {
         isDemo: true,
         useLocalOnly: true,
@@ -132,6 +136,12 @@ export const useAppStore = create<AppState>()(
       addAuditLog: (data) => set((state) => ({
         auditLogs: [...state.auditLogs, { ...data, id: `log_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
+      
+      setUsers: (users) => set({ users }),
+      
+      addUser: (data) => set((state) => ({
+        users: [...state.users, { ...data, id: `usr_${Date.now()}`, createdAt: new Date().toISOString() }]
+      })),
 
       resetDemoData: () => set({
         business: demoBusiness,
@@ -142,7 +152,8 @@ export const useAppStore = create<AppState>()(
         visits: [],
         rewards: [],
         redemptions: [],
-        auditLogs: []
+        auditLogs: [],
+        users: demoUsers
       })
     }),
     {
