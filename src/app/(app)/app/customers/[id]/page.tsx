@@ -6,7 +6,7 @@ import { ArrowLeft, Star, Gift, CheckCircle2, UserPlus, Mail, Phone, Calendar } 
 import Link from 'next/link';
 import { demoActivity } from '@/lib/demo/data';
 import { useAppStore } from '@/lib/store';
-import { formatRelativeTime, getProgressPercentage } from '@/lib/utils';
+import { formatRelativeTime, getProgressPercentage, cn } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useState, useEffect } from 'react';
 import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
