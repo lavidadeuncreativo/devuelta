@@ -9,19 +9,19 @@ import {
   Settings, ChevronLeft, ChevronRight, LogOut,
   QrCode, Bell, Search, Menu, X, Megaphone,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useAppStore } from '@/lib/store';
 
 const navItems = [
   { href: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { href: '/app/programs', icon: Star, label: 'Programas' },
   { href: '/app/customers', icon: Users, label: 'Clientes' },
-  { href: '/app/operations', icon: Zap, label: 'Operaciones' },
   { href: '/app/marketing', icon: Megaphone, label: 'Marketing' },
   { href: '/app/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/app/settings', icon: Settings, label: 'Configuración' },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const { brandConfig } = useAppStore();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
@@ -35,8 +35,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const customStyles = {
+    '--color-brand': brandConfig.primaryColor,
+    '--color-brand-light': brandConfig.primaryColor + 'e6',
+    '--color-brand-dark': brandConfig.primaryColor + 'cc',
+    '--color-brand-subtle': brandConfig.primaryColor + '15',
+  } as React.CSSProperties;
+
   return (
-    <div className="min-h-screen flex bg-[var(--color-bg-primary)]">
+    <div className="min-h-screen flex bg-[var(--color-bg-primary)] transition-colors" style={customStyles}>
       {/* Desktop Sidebar */}
       <motion.aside
         className={cn(

@@ -4,14 +4,18 @@ import { use } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Star, Gift, CheckCircle2, UserPlus, Mail, Phone, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { demoCustomers, demoMemberships, demoPrograms, demoActivity } from '@/lib/demo/data';
+import { demoActivity } from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
 import { formatRelativeTime, getProgressPercentage } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const customer = demoCustomers.find(c => c.id === id) || demoCustomers[0];
-  const memberships = demoMemberships.filter(m => m.customerId === customer.id);
+  const { customers, memberships: allMemberships, programs, addVisit, redeemReward } = useAppStore();
+  const customer = customers.find((c) => c.id === id) || customers[0];
+  const memberships = allMemberships.filter((m) => m.customerId === customer.id);
+
+  if (!customer) return <div className="p-8 text-center">Cliente no encontrado</div>;
 
   return (
     <div className="p-6 sm:p-8 max-w-5xl mx-auto">
@@ -76,7 +80,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             <h2 className="text-sm font-semibold mb-4">Programas activos</h2>
             <div className="space-y-4">
               {memberships.map((mem) => {
-                const prog = demoPrograms.find(p => p.id === mem.programId);
+                const prog = programs.find(p => p.id === mem.programId);
                 if (!prog) return null;
                 const isVisits = prog.programType === 'visits';
                 const current = isVisits ? mem.currentVisits : mem.currentPoints;
@@ -145,8 +149,11 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         <div className="space-y-6">
           <h2 className="text-sm font-semibold">Pase digital</h2>
           {memberships[0] && (() => {
-            const prog = demoPrograms.find(p => p.id === memberships[0].programId);
+            const prog = programs.find(p => p.id === memberships[0].programId);
             if (!prog) return null;
+            const isVisits = prog.programType === 'visits';
+            const current = isVisits ? memberships[0].currentVisits : memberships[0].currentPoints;
+            const canRedeem = current >= prog.goalValue;
             return (
               <DigitalPassCard
                 businessName="Café Origen"
@@ -166,18 +173,35 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             );
           })()}
 
-          {/* Quick actions */}
-          <div className="card-surface p-4 space-y-2">
-            <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Acciones rápidas</h3>
-            <Link href="/app/operations" className="btn-primary w-full justify-center text-sm">
-              <Star size={14} />
-              Registrar visita
-            </Link>
-            <button className="btn-secondary w-full justify-center text-sm">
-              <Gift size={14} />
-              Redimir recompensa
-            </button>
-          </div>
+          {/* Quick actions for 1st Program */}
+          {memberships[0] && (() => {
+            const prog = programs.find(p => p.id === memberships[0].programId);
+            if (!prog) return null;
+            const isVisits = prog.programType === 'visits';
+            const current = isVisits ? memberships[0].currentVisits : memberships[0].currentPoints;
+            const canRedeem = current >= prog.goalValue;
+
+            return (
+              <div className="card-surface p-4 space-y-2">
+                <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Acciones ({prog.name})</h3>
+                <button 
+                  onClick={() => addVisit(memberships[0].id)}
+                  className="btn-primary w-full justify-center text-sm"
+                >
+                  <Star size={14} />
+                  Registrar visita
+                </button>
+                <button 
+                  onClick={() => redeemReward(memberships[0].id)}
+                  disabled={!canRedeem}
+                  className={`btn-secondary w-full justify-center text-sm ${!canRedeem ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  <Gift size={14} />
+                  Redimir recompensa
+                </button>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

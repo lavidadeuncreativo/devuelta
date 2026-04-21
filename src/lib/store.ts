@@ -14,11 +14,19 @@ interface AppState {
   memberships: Membership[];
   locations: BranchLocation[];
 
+  brandConfig: {
+    primaryColor: string;
+    secondaryColor: string;
+    logoUrl?: string;
+  };
+
   addProgram: (program: Omit<LoyaltyProgram, 'id' | 'createdAt' | 'updatedAt'>) => void;
   addCustomer: (customer: Omit<Customer, 'id' | 'joinedAt'>) => void;
   addMembership: (membership: Omit<Membership, 'id' | 'enrolledAt' | 'lastVisitAt'>) => void;
   addVisit: (membershipId: string, visitsToAdd?: number) => void;
+  redeemReward: (membershipId: string) => void;
   addLocation: (location: Omit<BranchLocation, 'id' | 'createdAt'>) => void;
+  updateBrandConfig: (config: Partial<AppState['brandConfig']>) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -28,6 +36,10 @@ export const useAppStore = create<AppState>()(
       customers: demoCustomers,
       memberships: demoMemberships,
       locations: demoLocations,
+      brandConfig: {
+        primaryColor: '#7c3aed',
+        secondaryColor: '#f0e6d3',
+      },
 
       addProgram: (data) => set((state) => ({
         programs: [...state.programs, {
@@ -60,9 +72,32 @@ export const useAppStore = create<AppState>()(
           if (m.id === membershipId) {
             return {
               ...m,
+              currentVisits: m.currentVisits + visitsToAdd,
               totalVisits: m.totalVisits + visitsToAdd,
               lastVisitAt: new Date().toISOString()
             };
+          }
+          return m;
+        })
+      })),
+
+      redeemReward: (membershipId) => set((state) => ({
+        memberships: state.memberships.map((m) => {
+          if (m.id === membershipId) {
+            const prog = state.programs.find((p) => p.id === m.programId);
+            if (!prog) return m;
+
+            const isVisits = prog.programType === 'visits';
+            const canRedeem = (isVisits ? m.currentVisits : m.currentPoints) >= prog.goalValue;
+            
+            if (canRedeem) {
+              return {
+                ...m,
+                currentVisits: isVisits ? m.currentVisits - prog.goalValue : m.currentVisits,
+                currentPoints: !isVisits ? m.currentPoints - prog.goalValue : m.currentPoints,
+                rewardsRedeemed: m.rewardsRedeemed + 1
+              };
+            }
           }
           return m;
         })
@@ -74,6 +109,10 @@ export const useAppStore = create<AppState>()(
           id: `loc_${Date.now()}`,
           createdAt: new Date().toISOString()
         }]
+      })),
+
+      updateBrandConfig: (config) => set((state) => ({
+        brandConfig: { ...state.brandConfig, ...config }
       }))
     }),
     {

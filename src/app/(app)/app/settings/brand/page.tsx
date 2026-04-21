@@ -7,12 +7,21 @@ import Link from 'next/link';
 import { demoBusiness } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 
+import { useAppStore } from '@/lib/store';
+
 export default function BrandSettingsPage() {
+  const { brandConfig, updateBrandConfig } = useAppStore();
+  
   const [name, setName] = useState(demoBusiness.name);
-  const [primaryColor, setPrimaryColor] = useState(demoBusiness.primaryColor);
-  const [secondaryColor, setSecondaryColor] = useState(demoBusiness.secondaryColor || '#f0e6d3');
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(undefined);
+  const [primaryColor, setPrimaryColor] = useState(brandConfig.primaryColor);
+  const [secondaryColor, setSecondaryColor] = useState(brandConfig.secondaryColor);
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(brandConfig.logoUrl);
   const [stampIconUrl, setStampIconUrl] = useState<string | undefined>(undefined);
+
+  const handleSave = () => {
+    updateBrandConfig({ primaryColor, secondaryColor, logoUrl });
+    // In a real app we would save this to the backend here
+  };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void) => {
     const file = e.target.files?.[0];
@@ -101,7 +110,7 @@ export default function BrandSettingsPage() {
             </div>
           </div>
 
-          <button className="btn-primary w-full sm:w-auto"><Save size={15} /> Guardar cambios</button>
+          <button onClick={handleSave} className="btn-primary w-full sm:w-auto"><Save size={15} /> Guardar cambios</button>
         </div>
 
         <div>
@@ -117,7 +126,7 @@ export default function BrandSettingsPage() {
               programType="visits"
               bgColor={primaryColor}
               textColor={secondaryColor}
-              animated={false}
+              animated={true}
               logoUrl={logoUrl}
               stampIconUrl={stampIconUrl}
             />
