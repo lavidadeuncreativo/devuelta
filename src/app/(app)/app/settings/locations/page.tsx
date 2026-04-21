@@ -22,7 +22,6 @@ export default function LocationsSettingsPage() {
       name: newLocName,
       address: newLocAddress,
       city: newLocCity || 'Ciudad de México',
-      timezone: 'America/Mexico_City',
       isActive: true
     });
     setShowAddModal(false);

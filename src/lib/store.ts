@@ -18,7 +18,7 @@ interface AppState {
   addCustomer: (customer: Omit<Customer, 'id' | 'joinedAt'>) => void;
   addMembership: (membership: Omit<Membership, 'id' | 'enrolledAt' | 'lastVisitAt'>) => void;
   addVisit: (membershipId: string, visitsToAdd?: number) => void;
-  addLocation: (location: Omit<BranchLocation, 'id'>) => void;
+  addLocation: (location: Omit<BranchLocation, 'id' | 'createdAt'>) => void;
 }
 
 export const useAppStore = create<AppState>()(
