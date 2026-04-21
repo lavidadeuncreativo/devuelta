@@ -8,6 +8,7 @@ import { demoPrograms, demoMemberships } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { getProgramTypeLabel } from '@/lib/utils';
 import type { LoyaltyProgram } from '@/lib/types';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -15,6 +16,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
   
   // State for live editing
   const [isEditing, setIsEditing] = useState(false);
+  const [showQRModal, setShowQRModal] = useState(false);
   const [program, setProgram] = useState<LoyaltyProgram>(initialProgram);
   
   const members = demoMemberships.filter(m => m.programId === program.id);
@@ -94,7 +96,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
             <div className="card-surface p-5">
               <h3 className="text-sm font-semibold mb-3">Acciones</h3>
               <div className="flex flex-wrap gap-2">
-                <button className="btn-primary text-sm"><QrCode size={14} /> Ver QR</button>
+                <button className="btn-primary text-sm" onClick={() => setShowQRModal(true)}><QrCode size={14} /> Ver QR</button>
                 <button className="btn-secondary text-sm"><Share2 size={14} /> Compartir link</button>
                 <button className="btn-ghost text-sm" onClick={() => setIsEditing(true)}><Settings size={14} /> Editar diseño y reglas</button>
                 <button className="btn-ghost text-sm text-amber-400"><Pause size={14} /> Pausar</button>
@@ -163,6 +165,10 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Inscripción</p>
                   <p className="capitalize">{program.enrollmentMode}</p>
                 </div>
+                <div>
+                  <p className="text-xs text-[var(--color-text-muted)] mb-1">Creado por</p>
+                  <p>{program.createdBy || 'Sistema'}</p>
+                </div>
               </div>
             )}
           </div>
@@ -195,6 +201,52 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
           </div>
         </div>
       </div>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {showQRModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowQRModal(false)}
+            />
+            <motion.div
+              className="relative bg-[var(--color-bg-primary)] border border-[var(--color-border-subtle)] rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center"
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+            >
+              <button
+                className="absolute top-4 right-4 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                onClick={() => setShowQRModal(false)}
+              >
+                <X size={20} />
+              </button>
+              <div className="w-12 h-12 rounded-full gradient-brand mx-auto flex items-center justify-center mb-6">
+                <QrCode size={24} className="text-white" />
+              </div>
+              <h2 className="text-xl font-bold tracking-tight mb-2">Escanea para unirte</h2>
+              <p className="text-sm text-[var(--color-text-secondary)] mb-8">
+                Muestra este código a tus clientes para que se inscriban en {program.name}.
+              </p>
+              <div className="bg-white p-4 rounded-xl inline-block mx-auto mb-6">
+                <QRCodeSVG
+                  value={`https://devuelta.app/enroll/demo-business/${program.slug}`}
+                  size={200}
+                  level="H"
+                  includeMargin={false}
+                />
+              </div>
+              <button className="btn-secondary w-full" onClick={() => setShowQRModal(false)}>
+                Cerrar
+              </button>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

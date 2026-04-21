@@ -95,7 +95,7 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <Link href="/signup" className="btn-primary text-base !py-3 !px-6 group">
-                Solicitar demo
+                Pruébalo gratis 7 días
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
               </Link>
               <a href="#como-funciona" className="btn-secondary !py-3 !px-6">

@@ -93,6 +93,7 @@ export interface LoyaltyProgram {
   passTextColor: string;
   passLogoUrl?: string;
   passStampIcon?: string;
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
 }

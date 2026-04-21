@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Star, Users, Zap, BarChart3,
@@ -23,7 +23,16 @@ const navItems = [
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSearchKeys = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && globalSearch.trim()) {
+      router.push(`/app/customers?search=${encodeURIComponent(globalSearch.trim())}`);
+      setMobileOpen(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex bg-[var(--color-bg-primary)]">
@@ -113,7 +122,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
             )}
             {!collapsed && (
-              <button className="p-1.5 rounded-lg hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)] transition-colors" title="Cerrar sesión">
+              <button 
+                onClick={() => router.push('/login')}
+                className="p-1.5 rounded-lg hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-muted)] transition-colors" 
+                title="Cerrar sesión"
+              >
                 <LogOut size={15} />
               </button>
             )}
@@ -141,6 +154,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 type="text"
                 placeholder="Buscar clientes, programas..."
                 className="input-field !pl-9 !py-2 text-sm !bg-[var(--color-bg-primary)]"
+                value={globalSearch}
+                onChange={e => setGlobalSearch(e.target.value)}
+                onKeyDown={handleSearchKeys}
               />
             </div>
           </div>

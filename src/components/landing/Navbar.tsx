@@ -79,7 +79,7 @@ export function Navbar() {
                 href="/signup"
                 className="btn-primary text-sm !py-2 !px-4"
               >
-                Solicitar demo
+                Pruébalo gratis
                 <ArrowRight size={14} />
               </Link>
             </div>
@@ -130,7 +130,7 @@ export function Navbar() {
                   Iniciar sesión
                 </Link>
                 <Link href="/signup" className="btn-primary w-full justify-center" onClick={() => setMobileOpen(false)}>
-                  Solicitar demo
+                  Pruébalo gratis
                   <ArrowRight size={14} />
                 </Link>
               </div>

@@ -593,13 +593,13 @@ export function FinalCTASection() {
             Convierte visitas en clientes frecuentes.
           </h2>
           <p className="text-lg text-[var(--color-text-secondary)] mb-8 max-w-lg mx-auto">
-            Empieza hoy con una prueba gratis de 14 días.
+            Empieza hoy con una prueba gratis de 7 días.
             Sin tarjeta de crédito. Sin compromiso.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary text-base !py-3 !px-8 group">
-              Solicitar demo
+              Comenzar gratis
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link href="/login" className="btn-secondary !py-3 !px-6">

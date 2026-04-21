@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import {
   Users, CreditCard, Eye, Gift, TrendingUp,
   Target, ArrowUpRight, Calendar,
-  Zap, BarChart3,
+  Zap, BarChart3, Download, Mail, Filter, CheckCircle2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import {
@@ -20,13 +20,57 @@ import {
 } from 'recharts';
 
 export default function AnalyticsPage() {
+  const [showToast, setShowToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState('');
+
+  const triggerAction = (msg: string) => {
+    setToastMsg(msg);
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 3000);
+  };
+
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
-        <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-          Datos accionables de tu programa de lealtad.
-        </p>
+    <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8 relative">
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] shadow-xl px-4 py-2.5 rounded-full"
+          >
+            <CheckCircle2 size={16} className="text-[var(--color-success)]" />
+            <span className="text-sm font-medium">{toastMsg}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Analytics</h1>
+          <p className="text-sm text-[var(--color-text-secondary)] mt-1">
+            Datos accionables de tu programa de lealtad.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 lg:gap-3">
+          <div className="relative">
+            <select className="input-field !py-2 !pl-9 !pr-8 text-sm appearance-none bg-[var(--color-bg-secondary)] border-none">
+              <option>Últimos 7 días</option>
+              <option>Último mes</option>
+              <option>Último trimestre</option>
+              <option>Este año</option>
+            </select>
+            <Filter size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" />
+          </div>
+          <button onClick={() => triggerAction('Reporte enviado a tu correo')} className="btn-secondary !py-2 px-3 text-sm hidden sm:flex">
+            <Mail size={15} />
+            Email
+          </button>
+          <button onClick={() => triggerAction('Descarga de CSV iniciada')} className="btn-primary !py-2 px-3 text-sm">
+            <Download size={15} />
+            Exportar CSV
+          </button>
+        </div>
       </div>
 
       {/* Insights cards */}
