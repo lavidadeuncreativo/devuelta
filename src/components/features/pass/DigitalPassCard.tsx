@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Star, Gift, QrCode, ChevronRight, Check, Sparkles } from 'lucide-react';
 import { cn, getProgressPercentage } from '@/lib/utils';
 import { useState, useEffect } from 'react';
@@ -22,6 +22,7 @@ interface DigitalPassCardProps {
   compact?: boolean;
   logoUrl?: string;
   stampIconUrl?: string;
+  funFact?: string;
 }
 
 export function DigitalPassCard({
@@ -41,10 +42,42 @@ export function DigitalPassCard({
   compact = false,
   logoUrl,
   stampIconUrl,
+  funFact,
 }: DigitalPassCardProps) {
   const progress = getProgressPercentage(currentValue, goalValue);
   const isVisitType = programType === 'visits';
   const stamps = isVisitType ? Array.from({ length: goalValue }, (_, i) => i < currentValue) : [];
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 40 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 40 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['7deg', '-7deg']);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-7deg', '7deg']);
+  
+  const glareX = useTransform(mouseXSpring, [-0.5, 0.5], ['100%', '0%']);
+  const glareY = useTransform(mouseYSpring, [-0.5, 0.5], ['100%', '0%']);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!animated) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    if (!animated) return;
+    x.set(0);
+    y.set(0);
+  };
 
   return (
     <motion.div
@@ -53,10 +86,19 @@ export function DigitalPassCard({
         compact ? 'rounded-2xl' : 'rounded-3xl',
         className
       )}
-      style={{ background: bgColor, color: textColor }}
+      style={{ 
+        background: bgColor, 
+        color: textColor,
+        rotateX: animated ? rotateX : 0,
+        rotateY: animated ? rotateY : 0,
+        transformPerspective: 1000,
+        transformStyle: "preserve-3d"
+      }}
       initial={animated ? { opacity: 0, y: 20, scale: 0.95 } : false}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
     >
       {/* Ambient light effect */}
       <div
@@ -65,6 +107,16 @@ export function DigitalPassCard({
           background: `radial-gradient(ellipse 60% 40% at 70% -10%, ${textColor}11 0%, transparent 70%)`,
         }}
       />
+
+      {/* Holographic Glare Overlay */}
+      {animated && (
+        <motion.div 
+          className="absolute inset-0 pointer-events-none opacity-40 mix-blend-color-dodge mix-blend-overlay z-20"
+          style={{
+            background: `radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.4), transparent 60%)`,
+          }}
+        />
+      )}
 
       {/* Subtle noise texture */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -119,14 +171,31 @@ export function DigitalPassCard({
           </AnimatePresence>
         </div>
 
-        {/* Customer name */}
-        {customerName && (
-          <p
-            className="text-sm font-medium mb-5"
-            style={{ color: `${textColor}99` }}
-          >
-            {customerName}
-          </p>
+        {/* Customer name and Fun Fact */}
+        {(customerName || funFact) && (
+          <div className="mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            {customerName && (
+              <p
+                className="text-sm font-medium"
+                style={{ color: `${textColor}99`, transform: 'translateZ(10px)' }}
+              >
+                {customerName}
+              </p>
+            )}
+            {funFact && (
+              <span 
+                className="text-xs px-2 py-0.5 rounded-full"
+                style={{ 
+                  background: `${textColor}15`, 
+                  color: `${textColor}90`,
+                  border: `1px solid ${textColor}20`,
+                  transform: 'translateZ(15px)'
+                }}
+              >
+                {funFact}
+              </span>
+            )}
+          </div>
         )}
 
         {/* Stamps grid (for visit-type programs) */}

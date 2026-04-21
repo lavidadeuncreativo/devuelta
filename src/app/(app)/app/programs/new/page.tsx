@@ -19,8 +19,7 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const steps = [
-  { id: 'type', label: 'Tipo', icon: Star },
-  { id: 'template', label: 'Plantilla', icon: Gift },
+  { id: 'template', label: 'Explorar plantillas', icon: Gift },
   { id: 'customize', label: 'Personalizar', icon: Palette },
   { id: 'preview', label: 'Vista previa', icon: Eye },
 ];
@@ -37,29 +36,14 @@ export default function NewProgramPage() {
   const [bgColor, setBgColor] = useState('#1a1a2e');
   const [textColor, setTextColor] = useState('#f0e6d3');
 
-  const businessTypes = [
-    { type: 'cafeteria', icon: Coffee, color: '#f0e6d3' },
-    { type: 'barberia', icon: Scissors, color: '#e2e8f0' },
-    { type: 'spa', icon: Sparkles, color: '#d4c5f9' },
-    { type: 'restaurante', icon: UtensilsCrossed, color: '#fcd34d' },
-    { type: 'panaderia', icon: Croissant, color: '#f5deb3' },
-    { type: 'fitness', icon: Dumbbell, color: '#7dd3fc' },
-    { type: 'tienda', icon: ShoppingBag, color: '#a5b4fc' },
-    { type: 'veterinaria', icon: PawPrint, color: '#86efac' },
-  ];
-
-  const handleSelectType = (type: string) => {
-    setSelectedType(type);
-    const template = programTemplates.find(t => t.businessType === type);
-    if (template) {
-      setSelectedTemplate(template);
-      setProgramName(template.name);
-      setProgramDesc(template.description);
-      setGoalValue(template.goalValue);
-      setRewardDetail(template.rewardDetail);
-      setBgColor(template.passBgColor);
-      setTextColor(template.passTextColor);
-    }
+  const handleSelectTemplate = (template: ProgramTemplate) => {
+    setSelectedTemplate(template);
+    setProgramName(template.name);
+    setProgramDesc(template.description);
+    setGoalValue(template.goalValue);
+    setRewardDetail(template.rewardDetail);
+    setBgColor(template.passBgColor);
+    setTextColor(template.passTextColor);
     setCurrentStep(1);
   };
 
@@ -115,7 +99,7 @@ export default function NewProgramPage() {
 
       {/* Step content */}
       <AnimatePresence mode="wait">
-        {/* Step 1: Choose business type */}
+        {/* Step 1: Template selection */}
         {currentStep === 0 && (
           <motion.div
             key="step-0"
@@ -124,83 +108,42 @@ export default function NewProgramPage() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 className="text-lg font-semibold mb-2">¿Cuál es tu giro de negocio?</h2>
+            <h2 className="text-lg font-semibold mb-2">Selecciona una plantilla</h2>
             <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-              Te sugeriremos una plantilla perfecta para tu tipo de negocio.
+              Empieza rápido con una base probada. Podrás personalizar nombre, colores y recompensas en el siguiente paso.
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {businessTypes.map((biz) => (
+            <div className="grid sm:grid-cols-2 gap-4">
+              {programTemplates.map((template) => (
                 <button
-                  key={biz.type}
-                  onClick={() => handleSelectType(biz.type)}
-                  className={cn(
-                    'card-interactive p-5 text-center group',
-                    selectedType === biz.type && 'border-[var(--color-brand)] bg-[var(--color-brand-subtle)]'
-                  )}
+                  key={template.name}
+                  onClick={() => handleSelectTemplate(template)}
+                  className="card-interactive p-5 text-left group"
                 >
-                  <div
-                    className="w-12 h-12 rounded-xl mx-auto mb-3 flex items-center justify-center transition-transform group-hover:scale-110"
-                    style={{ background: `${biz.color}12` }}
-                  >
-                    <biz.icon size={22} style={{ color: biz.color }} />
+                  <div className="flex items-start gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-subtle)] flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
+                      {iconMap[template.icon] && (() => {
+                        const Icon = iconMap[template.icon];
+                        return <Icon size={22} className="text-[var(--color-brand)]" />;
+                      })()}
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-1 group-hover:text-[var(--color-brand)] transition-colors">{template.name}</h3>
+                      <p className="text-sm text-[var(--color-text-secondary)] mb-3">{template.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="badge badge-brand">{template.programType === 'visits' ? 'Visitas' : 'Puntos'}</span>
+                        <span className="badge badge-muted">Meta: {template.goalValue}</span>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-sm font-medium">{getBusinessTypeLabel(biz.type)}</p>
                 </button>
               ))}
             </div>
           </motion.div>
         )}
 
-        {/* Step 2: Template selection */}
-        {currentStep === 1 && selectedTemplate && (
-          <motion.div
-            key="step-1"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-lg font-semibold mb-2">Tu plantilla sugerida</h2>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-              Puedes personalizar todos los detalles en el siguiente paso.
-            </p>
-
-            <div className="card-surface p-6 mb-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-subtle)] flex items-center justify-center shrink-0">
-                  {iconMap[selectedTemplate.icon] && (() => {
-                    const Icon = iconMap[selectedTemplate.icon];
-                    return <Icon size={22} className="text-[var(--color-brand)]" />;
-                  })()}
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-1">{selectedTemplate.name}</h3>
-                  <p className="text-sm text-[var(--color-text-secondary)] mb-3">{selectedTemplate.description}</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="badge badge-brand">{selectedTemplate.programType === 'visits' ? 'Visitas' : 'Puntos'}</span>
-                    <span className="badge badge-muted">Meta: {selectedTemplate.goalValue}</span>
-                    <span className="badge badge-muted">{selectedTemplate.rewardDetail}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button onClick={back} className="btn-secondary">
-                <ArrowLeft size={15} />
-                Atrás
-              </button>
-              <button onClick={next} className="btn-primary">
-                Usar esta plantilla
-                <ArrowRight size={15} />
-              </button>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 3: Customize */}
-        {currentStep === 2 && (
+        {/* Step 2: Customize */}
+        {currentStep === 1 && (
           <motion.div
             key="step-2"
             initial={{ opacity: 0, x: 20 }}
@@ -271,6 +214,7 @@ export default function NewProgramPage() {
                   businessName="Tu Negocio"
                   programName={programName || 'Mi Programa'}
                   customerName="Cliente Demo"
+                  funFact="Nivel: VIP Oro"
                   currentValue={Math.min(3, goalValue - 1)}
                   goalValue={goalValue}
                   rewardDetail={rewardDetail || 'Recompensa'}
@@ -284,8 +228,8 @@ export default function NewProgramPage() {
           </motion.div>
         )}
 
-        {/* Step 4: Final preview */}
-        {currentStep === 3 && (
+        {/* Step 3: Final preview */}
+        {currentStep === 2 && (
           <motion.div
             key="step-3"
             initial={{ opacity: 0, x: 20 }}
@@ -304,6 +248,7 @@ export default function NewProgramPage() {
                   businessName="Tu Negocio"
                   programName={programName}
                   customerName="Cliente Demo"
+                  funFact="Nivel: VIP Oro"
                   currentValue={Math.min(3, goalValue - 1)}
                   goalValue={goalValue}
                   rewardDetail={rewardDetail}

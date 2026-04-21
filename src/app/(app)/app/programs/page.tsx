@@ -3,10 +3,12 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Plus, Star, Users, Eye, Gift, ArrowUpRight } from 'lucide-react';
-import { demoProgramStats } from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
 
 export default function ProgramsPage() {
+  const { programs, memberships } = useAppStore();
+
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
@@ -23,48 +25,60 @@ export default function ProgramsPage() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {demoProgramStats.map((prog, i) => (
-          <motion.div
-            key={prog.id}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.08 }}
-          >
-            <Link href={`/app/programs/${prog.id}`} className="card-interactive p-6 block h-full">
-              <div className="flex items-center justify-between mb-4">
-                <span className="badge badge-brand">{getProgramTypeLabel(prog.programType)}</span>
-                <span className="badge badge-success">Activo</span>
-              </div>
+        {programs.map((prog, i) => {
+          const progMemberships = memberships.filter(m => m.programId === prog.id);
+          const totalMembers = progMemberships.length;
+          const activeMembers = progMemberships.filter(m => {
+            const date = new Date(m.lastVisitAt);
+            const daysAgo = (Date.now() - date.getTime()) / (1000 * 3600 * 24);
+            return daysAgo <= 30;
+          }).length;
+          const totalVisits = progMemberships.reduce((sum, m) => sum + m.totalVisits, 0);
+          const totalRedemptions = progMemberships.reduce((sum, m) => sum + m.rewardsEarned, 0);
 
-              <h3 className="text-lg font-semibold mb-1">{prog.name}</h3>
-              <p className="text-sm text-[var(--color-text-muted)] mb-5 line-clamp-2">{prog.description}</p>
+          return (
+            <motion.div
+              key={prog.id}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+            >
+              <Link href={`/app/programs/${prog.id}`} className="card-interactive p-6 block h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="badge badge-brand">{getProgramTypeLabel(prog.programType)}</span>
+                  <span className="badge badge-success">Activo</span>
+                </div>
 
-              <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] mb-5">
-                <Gift size={14} className="text-[var(--color-brand)]" />
-                <span>{prog.rewardDetail}</span>
-              </div>
+                <h3 className="text-lg font-semibold mb-1">{prog.name}</h3>
+                <p className="text-sm text-[var(--color-text-muted)] mb-5 line-clamp-2">{prog.description}</p>
 
-              <div className="grid grid-cols-4 gap-3 pt-4 border-t border-[var(--color-border-subtle)]">
-                <div>
-                  <p className="text-lg font-bold">{prog.totalMembers}</p>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Miembros</p>
+                <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] mb-5">
+                  <Gift size={14} className="text-[var(--color-brand)]" />
+                  <span>{prog.rewardDetail}</span>
                 </div>
-                <div>
-                  <p className="text-lg font-bold">{prog.activeMembers}</p>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Activos</p>
+
+                <div className="grid grid-cols-4 gap-3 pt-4 border-t border-[var(--color-border-subtle)]">
+                  <div>
+                    <p className="text-lg font-bold">{totalMembers}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Miembros</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">{activeMembers}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Activos</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">{totalVisits}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Visitas</p>
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold">{totalRedemptions}</p>
+                    <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Canjes</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-lg font-bold">{prog.totalVisits}</p>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Visitas</p>
-                </div>
-                <div>
-                  <p className="text-lg font-bold">{prog.totalRedemptions}</p>
-                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Canjes</p>
-                </div>
-              </div>
-            </Link>
-          </motion.div>
-        ))}
+              </Link>
+            </motion.div>
+          );
+        })}
       </div>
     </div>
   );

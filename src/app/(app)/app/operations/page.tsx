@@ -7,7 +7,7 @@ import {
   ChevronRight, Zap, RotateCcw, Sparkles,
   ArrowLeft,
 } from 'lucide-react';
-import { demoCustomers, demoMemberships, demoPrograms } from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
 import { cn, getProgressPercentage } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import type { Customer, Membership, LoyaltyProgram } from '@/lib/types';
@@ -20,6 +20,7 @@ interface SelectedCustomer {
 }
 
 export default function OperationsPage() {
+  const { customers, memberships, programs, addVisit } = useAppStore();
   const [mode, setMode] = useState<OperationMode>('search');
   const [query, setQuery] = useState('');
   const [selected, setSelected] = useState<SelectedCustomer | null>(null);
@@ -27,7 +28,7 @@ export default function OperationsPage() {
   const [successType, setSuccessType] = useState<'visit' | 'redemption'>('visit');
 
   const filteredCustomers = query.length >= 2
-    ? demoCustomers.filter(c =>
+    ? customers.filter(c =>
         c.fullName.toLowerCase().includes(query.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(query.toLowerCase())) ||
         (c.phone && c.phone.includes(query))
@@ -35,21 +36,23 @@ export default function OperationsPage() {
     : [];
 
   const selectCustomer = useCallback((customer: Customer) => {
-    const memberships = demoMemberships
+    const custMemberships = memberships
       .filter(m => m.customerId === customer.id)
       .map(m => ({
         ...m,
-        program: demoPrograms.find(p => p.id === m.programId)!,
+        program: programs.find(p => p.id === m.programId)!,
       }));
 
-    setSelected({ customer, memberships });
+    setSelected({ customer, memberships: custMemberships });
     setMode('customer');
     setQuery('');
-  }, []);
+  }, [memberships, programs]);
 
   const handleVisit = (membership: Membership & { program: LoyaltyProgram }) => {
     const newVisits = membership.currentVisits + 1;
     const rewardUnlocked = newVisits >= membership.program.goalValue;
+
+    addVisit(membership.id, 1);
 
     if (rewardUnlocked) {
       setSuccessMessage(`¡Recompensa desbloqueada! ${membership.program.rewardDetail}`);

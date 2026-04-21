@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Star, Users, Zap, BarChart3,
   Settings, ChevronLeft, ChevronRight, LogOut,
-  QrCode, Bell, Search, Menu, X,
+  QrCode, Bell, Search, Menu, X, Megaphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,7 @@ const navItems = [
   { href: '/app/programs', icon: Star, label: 'Programas' },
   { href: '/app/customers', icon: Users, label: 'Clientes' },
   { href: '/app/operations', icon: Zap, label: 'Operaciones' },
+  { href: '/app/marketing', icon: Megaphone, label: 'Marketing' },
   { href: '/app/analytics', icon: BarChart3, label: 'Analytics' },
   { href: '/app/settings', icon: Settings, label: 'Configuración' },
 ];

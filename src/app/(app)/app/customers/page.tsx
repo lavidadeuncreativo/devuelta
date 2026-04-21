@@ -5,11 +5,12 @@ import { Search, UserPlus, Star, Gift, ChevronRight, Users as UsersIcon } from '
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { demoCustomers, demoMemberships, demoPrograms } from '@/lib/demo/data';
 import { formatRelativeTime } from '@/lib/utils';
+import { useAppStore } from '@/lib/store';
 
 function CustomersList() {
   const searchParams = useSearchParams();
+  const { customers, memberships } = useAppStore();
   const [query, setQuery] = useState('');
 
   useEffect(() => {
@@ -20,12 +21,12 @@ function CustomersList() {
   }, [searchParams]);
 
   const filtered = query
-    ? demoCustomers.filter(c =>
+    ? customers.filter(c =>
         c.fullName.toLowerCase().includes(query.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(query.toLowerCase())) ||
         (c.phone && c.phone.includes(query))
       )
-    : demoCustomers;
+    : customers;
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
@@ -33,7 +34,7 @@ function CustomersList() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Clientes</h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            {demoCustomers.length} clientes registrados en tu negocio.
+            {customers.length} clientes registrados en tu negocio.
           </p>
         </div>
         <button className="btn-primary">
@@ -57,7 +58,7 @@ function CustomersList() {
       {/* Customer list */}
       <div className="card-surface divide-y divide-[var(--color-border-subtle)]">
         {filtered.map((customer, i) => {
-          const mems = demoMemberships.filter(m => m.customerId === customer.id);
+          const mems = memberships.filter(m => m.customerId === customer.id);
           const totalVisits = mems.reduce((s, m) => s + m.totalVisits, 0);
           const rewards = mems.reduce((s, m) => s + m.rewardsEarned, 0);
 
