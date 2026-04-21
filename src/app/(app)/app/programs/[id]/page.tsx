@@ -253,7 +253,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               </div>
               <h2 className="text-xl font-bold tracking-tight mb-2">Escanea para unirte</h2>
               <p className="text-sm text-[var(--color-text-secondary)] mb-8">
-                Muestra este código a tus clientes para que se inscriban en {program.name}.
+                Muestra este código a tus clientes para que se inscriban en {currentProgram.name}.
               </p>
               <div className="bg-white p-4 rounded-xl inline-block mx-auto mb-6">
                 <QRCodeSVG
