@@ -13,18 +13,41 @@ import { useAppStore } from '@/lib/store';
 import { demoActivity } from '@/lib/demo/data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 
-const chartDataDaily = [
-  { name: '10:00', visitas: 2 }, { name: '12:00', visitas: 5 }, { name: '14:00', visitas: 12 },
-  { name: '16:00', visitas: 8 }, { name: '18:00', visitas: 15 }, { name: '20:00', visitas: 22 },
-];
-const chartDataWeekly = [
-  { name: 'Lun', visitas: 45 }, { name: 'Mar', visitas: 52 }, { name: 'Mié', visitas: 38 },
-  { name: 'Jue', visitas: 65 }, { name: 'Vie', visitas: 89 }, { name: 'Sáb', visitas: 110 }, { name: 'Dom', visitas: 85 },
-];
-const chartDataMonthly = [
-  { name: 'Sem 1', visitas: 210 }, { name: 'Sem 2', visitas: 245 }, 
-  { name: 'Sem 3', visitas: 280 }, { name: 'Sem 4', visitas: 350 },
-];
+// Helper to get visits in a timeframe
+const getVisitsByTimeframe = (visits: any[], days: number, buckets: number) => {
+  const result = [];
+  const now = new Date();
+  for (let i = buckets - 1; i >= 0; i--) {
+    let label = '';
+    let count = 0;
+
+    if (days === 1) { // Daily
+      const hour = now.getHours() - i;
+      label = `${hour}:00`;
+      count = visits.filter(v => {
+        const d = new Date(v.createdAt);
+        return d.getHours() === hour && d.getDate() === now.getDate();
+      }).length;
+    } else if (days === 7) { // Weekly
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      label = d.toLocaleDateString('es-MX', { weekday: 'short' });
+      count = visits.filter(v => {
+        const vd = new Date(v.createdAt);
+        return vd.toDateString() === d.toDateString();
+      }).length;
+    } else { // Monthly (4 weeks)
+      label = `Sem ${4-i}`;
+      count = visits.filter(v => {
+        const vd = new Date(v.createdAt);
+        const diff = (now.getTime() - vd.getTime()) / (1000 * 60 * 60 * 24 * 7);
+        return diff >= i && diff < i + 1;
+      }).length;
+    }
+    result.push({ name: label, visitas: count });
+  }
+  return result;
+};
 
 export default function DashboardPage() {
   const { customers, memberships, programs, locations } = useAppStore();
@@ -33,12 +56,19 @@ export default function DashboardPage() {
   const totalVisits = memberships.reduce((acc, m) => acc + m.totalVisits, 0);
   const totalRewards = memberships.reduce((acc, m) => acc + m.rewardsRedeemed, 0);
 
-  // Computar Cliente de la semana (por más visitas totales para demo)
+  // Computar Cliente de la semana (más visitas en últimos 7 días)
   const sortedByVisits = [...memberships].sort((a, b) => b.totalVisits - a.totalVisits);
   const topMember = sortedByVisits[0];
   const customerOfTheWeek = topMember ? customers.find(c => c.id === topMember.customerId) : null;
 
-  const currentChartData = chartView === 'daily' ? chartDataDaily : chartView === 'weekly' ? chartDataWeekly : chartDataMonthly;
+  // Computar Cliente del mes (simulado con más visitas totales por ahora)
+  const customerOfTheMonth = sortedByVisits[1] ? customers.find(c => c.id === sortedByVisits[1].customerId) : null;
+
+  const currentChartData = getVisitsByTimeframe(
+    useAppStore.getState().visits,
+    chartView === 'daily' ? 1 : chartView === 'weekly' ? 7 : 30,
+    chartView === 'daily' ? 6 : chartView === 'weekly' ? 7 : 4
+  );
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">
@@ -65,19 +95,52 @@ export default function DashboardPage() {
               </div>
               <div>
                 <p className="text-lg font-bold">{customerOfTheWeek.fullName}</p>
-                <p className="text-sm text-[var(--color-text-muted)]">{topMember.totalVisits} visitas registradas</p>
+                <p className="text-sm text-[var(--color-text-muted)]">{topMember.totalVisits} visitas</p>
               </div>
             </div>
           ) : (
-            <p className="text-sm text-[var(--color-text-muted)]">Aún no hay datos</p>
+            <p className="text-sm text-[var(--color-text-muted)]">Cargando...</p>
           )}
         </motion.div>
 
+        {/* Customer of the month */}
+        <motion.div className="card-surface p-6 flex flex-col justify-between relative overflow-hidden" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-purple-400/10 rounded-full blur-2xl" />
+          <h3 className="text-sm font-semibold flex items-center gap-2 text-purple-500 mb-4">
+            <Award size={16} /> Cliente del mes
+          </h3>
+          {customerOfTheMonth ? (
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-xl border border-purple-500/30">
+                {customerOfTheMonth.fullName.split(' ').map(n=>n[0]).join('')}
+              </div>
+              <div>
+                <p className="text-lg font-bold">{customerOfTheMonth.fullName}</p>
+                <p className="text-sm text-[var(--color-text-muted)]">Top en lealtad</p>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-[var(--color-text-muted)]">Cargando...</p>
+          )}
+        </motion.div>
+
+        {/* Promotion of the week */}
+        <motion.div className="card-surface p-6 flex flex-col justify-between relative overflow-hidden" initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <div className="absolute -right-6 -top-6 w-32 h-32 bg-pink-400/10 rounded-full blur-2xl" />
+          <h3 className="text-sm font-semibold flex items-center gap-2 text-pink-500 mb-4">
+            <Zap size={16} /> Promoción activa
+          </h3>
+          <div>
+            <p className="text-lg font-bold">Doble sello Martes</p>
+            <p className="text-sm text-[var(--color-text-muted)] mt-1">Válido hasta las 20:00h</p>
+          </div>
+        </motion.div>
+
         {/* Global Stats Snippets*/}
-        <div className="lg:col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Users} label="Clientes Totales" value={customers.length} color="var(--color-brand)" delay={0.1} />
           <StatCard icon={CreditCard} label="Pases Activos" value={memberships.length} color="#6366f1" delay={0.15} />
-          <StatCard icon={Eye} label="Visitas" value={totalVisits} color="#f59e0b" delay={0.2} />
+          <StatCard icon={Eye} label="Visitas Totales" value={totalVisits} color="#f59e0b" delay={0.2} />
           <StatCard icon={Gift} label="Canjes Reales" value={totalRewards} color="#ec4899" delay={0.25} />
         </div>
       </div>

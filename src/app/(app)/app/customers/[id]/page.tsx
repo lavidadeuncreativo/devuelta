@@ -8,12 +8,59 @@ import { demoActivity } from '@/lib/demo/data';
 import { useAppStore } from '@/lib/store';
 import { formatRelativeTime, getProgressPercentage } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
+import { useState, useEffect } from 'react';
+import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
+import { LoyaltyService } from '@/lib/services/loyalty-service';
+import { MembershipWithDetails } from '@/lib/types';
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const { customers, memberships: allMemberships, programs, addVisit, redeemReward } = useAppStore();
+  const { customers, memberships: allMemberships, programs, auditLogs, business } = useAppStore();
+  const [selectedMembershipIdx, setSelectedMembershipIdx] = useState(0);
+  const [customerMemberships, setCustomerMemberships] = useState<MembershipWithDetails[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const customer = customers.find((c) => c.id === id) || customers[0];
-  const memberships = allMemberships.filter((m) => m.customerId === customer.id);
+
+  // Logic to enrichment memberships
+  useEffect(() => {
+    if (customer) {
+      const mems = allMemberships.filter((m) => m.customerId === customer.id);
+      const enriched = mems.map(m => ({
+        ...m,
+        customer,
+        program: programs.find(p => p.id === m.programId)!,
+        rewards: useAppStore.getState().rewards.filter(r => r.membershipId === m.id)
+      })).filter(m => m.program);
+      setCustomerMemberships(enriched);
+    }
+  }, [customer, allMemberships, programs]);
+
+  const selectedMembership = customerMemberships[selectedMembershipIdx];
+
+  const handleAction = async (type: 'visit' | 'redeem') => {
+    if (!selectedMembership) return;
+    setIsProcessing(true);
+    
+    const service = new LoyaltyService(
+      new DemoProgramRepository(),
+      new DemoMembershipRepository(),
+      new DemoVisitRepository(),
+      new DemoRewardRepository(),
+      new DemoRedemptionRepository(),
+      new DemoAuditRepository()
+    );
+
+    const locationId = useAppStore.getState().locations[0]?.id || 'loc_01';
+    
+    if (type === 'visit') {
+      await service.recordVisit(selectedMembership.id, locationId, 'staff_01');
+    } else {
+      await service.redeemReward(selectedMembership.id, locationId, 'staff_01');
+    }
+    
+    setIsProcessing(false);
+  };
 
   if (!customer) return <div className="p-8 text-center">Cliente no encontrado</div>;
 
@@ -62,15 +109,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <p className="text-2xl font-bold">{memberships.reduce((s, m) => s + m.totalVisits, 0)}</p>
+              <p className="text-2xl font-bold">{customerMemberships.reduce((s, m) => s + m.totalVisits, 0)}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Total visitas</p>
             </motion.div>
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <p className="text-2xl font-bold">{memberships.reduce((s, m) => s + m.rewardsEarned, 0)}</p>
+              <p className="text-2xl font-bold">{customerMemberships.reduce((s, m) => s + m.rewardsRedeemed, 0)}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Recompensas</p>
             </motion.div>
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-              <p className="text-2xl font-bold">{memberships.length}</p>
+              <p className="text-2xl font-bold">{customerMemberships.length}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Programas</p>
             </motion.div>
           </div>
@@ -79,33 +126,40 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <div>
             <h2 className="text-sm font-semibold mb-4">Programas activos</h2>
             <div className="space-y-4">
-              {memberships.map((mem) => {
-                const prog = programs.find(p => p.id === mem.programId);
-                if (!prog) return null;
+              {customerMemberships.map((mem, idx) => {
+                const prog = mem.program;
                 const isVisits = prog.programType === 'visits';
-                const current = isVisits ? mem.currentVisits : mem.currentPoints;
+                const current = mem.currentVisits;
                 const progress = getProgressPercentage(current, prog.goalValue);
+                const isSelected = selectedMembershipIdx === idx;
 
                 return (
-                  <div key={mem.id} className="card-surface p-5">
+                  <button 
+                    key={mem.id} 
+                    className={cn(
+                      "w-full text-left card-surface p-5 transition-all outline-none",
+                      isSelected ? "ring-2 ring-[var(--color-brand)] border-transparent" : "hover:border-[var(--color-brand)]/30"
+                    )}
+                    onClick={() => setSelectedMembershipIdx(idx)}
+                  >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-base font-semibold">{prog.name}</h3>
                       <span className="badge badge-brand">
                         {isVisits ? `${current}/${prog.goalValue}` : `${current} pts`}
                       </span>
                     </div>
-                    <div className="h-2 rounded-full bg-[var(--color-bg-primary)] mb-2">
+                    <div className="h-2 rounded-full bg-[var(--color-bg-primary)] mb-2 overflow-hidden">
                       <motion.div
                         className="h-full rounded-full gradient-brand"
                         initial={{ width: 0 }}
                         animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        transition={{ duration: 0.8 }}
                       />
                     </div>
                     <p className="text-xs text-[var(--color-text-muted)]">
                       {prog.rewardDetail} — {current >= prog.goalValue ? '🎁 ¡Disponible!' : `Faltan ${prog.goalValue - current} ${isVisits ? 'visitas' : 'puntos'}`}
                     </p>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -115,29 +169,30 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <div>
             <h2 className="text-sm font-semibold mb-4">Actividad reciente</h2>
             <div className="space-y-1">
-              {demoActivity.filter(a => a.customerName === customer.fullName).length > 0
-                ? demoActivity.filter(a => a.customerName === customer.fullName).map(act => (
-                  <div key={act.id} className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors">
+              {auditLogs.filter(l => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id)).length > 0
+                ? auditLogs
+                    .filter(l => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id))
+                    .sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map(log => (
+                  <div key={log.id} className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center mt-0.5 ${
-                      act.type === 'visit' ? 'bg-amber-500/15' :
-                      act.type === 'enrollment' ? 'bg-[var(--color-brand)]/15' :
-                      act.type === 'reward_unlocked' ? 'bg-purple-500/15' : 'bg-pink-500/15'
+                      log.action === 'RECORD_VISIT' ? 'bg-amber-500/15' :
+                      log.action === 'REDEEM_REWARD' ? 'bg-pink-500/15' : 'bg-[var(--color-brand)]/15'
                     }`}>
-                      {act.type === 'visit' && <Star size={12} className="text-amber-400" />}
-                      {act.type === 'enrollment' && <UserPlus size={12} className="text-[var(--color-brand-light)]" />}
-                      {act.type === 'reward_unlocked' && <Gift size={12} className="text-purple-400" />}
-                      {act.type === 'redemption' && <CheckCircle2 size={12} className="text-pink-400" />}
+                      {log.action === 'RECORD_VISIT' && <Star size={12} className="text-amber-400" />}
+                      {log.action === 'REDEEM_REWARD' && <Gift size={12} className="text-pink-400" />}
+                      {log.action.includes('ENROLL') && <UserPlus size={12} className="text-[var(--color-brand-light)]" />}
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm">{act.detail}</p>
-                      <p className="text-xs text-[var(--color-text-muted)]">{formatRelativeTime(act.timestamp)}</p>
+                      <p className="text-sm font-medium">{log.action === 'RECORD_VISIT' ? 'Visita registrada' : log.action === 'REDEEM_REWARD' ? 'Recompensa canjeada' : log.action}</p>
+                      <p className="text-xs text-[var(--color-text-muted)]">{formatRelativeTime(log.createdAt)}</p>
                     </div>
                   </div>
                 ))
                 : (
-                  <div className="text-center py-8 card-surface">
-                    <Star size={24} className="mx-auto text-[var(--color-text-muted)] mb-2" />
-                    <p className="text-sm text-[var(--color-text-secondary)]">Actividad del cliente se mostrará aquí</p>
+                  <div className="text-center py-8 border border-dashed border-[var(--color-border-subtle)] rounded-2xl">
+                    <Star size={24} className="mx-auto text-[var(--color-text-muted)] mb-2 opacity-50" />
+                    <p className="text-xs text-[var(--color-text-muted)]">No hay actividad reciente para este programa</p>
                   </div>
                 )
               }
@@ -145,64 +200,51 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           </div>
         </div>
 
-        {/* Right — Pass preview */}
-        <div className="space-y-6">
-          <h2 className="text-sm font-semibold">Pase digital</h2>
-          {memberships[0] && (() => {
-            const prog = programs.find(p => p.id === memberships[0].programId);
-            if (!prog) return null;
-            const isVisits = prog.programType === 'visits';
-            const current = isVisits ? memberships[0].currentVisits : memberships[0].currentPoints;
-            const canRedeem = current >= prog.goalValue;
-            return (
+          {/* Pass preview */}
+          <div className="space-y-6">
+            <h2 className="text-sm font-semibold">Pase digital</h2>
+            {selectedMembership && (
               <DigitalPassCard
-                businessName="Café Origen"
-                programName={prog.name}
+                businessName={business?.name || 'Tu Negocio'}
+                programName={selectedMembership.program.name}
                 customerName={customer.fullName}
-                currentValue={prog.programType === 'visits' ? memberships[0].currentVisits : memberships[0].currentPoints}
-                goalValue={prog.goalValue}
-                rewardDetail={prog.rewardDetail}
-                programType={prog.programType}
-                bgColor={prog.passBgColor}
-                textColor={prog.passTextColor}
-                rewardAvailable={
-                  (prog.programType === 'visits' ? memberships[0].currentVisits : memberships[0].currentPoints) >= prog.goalValue
-                }
+                currentValue={selectedMembership.currentVisits}
+                goalValue={selectedMembership.program.goalValue}
+                rewardDetail={selectedMembership.program.rewardDetail}
+                programType={selectedMembership.program.programType}
+                bgColor={selectedMembership.program.passBgColor}
+                textColor={selectedMembership.program.passTextColor}
+                rewardAvailable={selectedMembership.rewards.some(r => r.status === 'available')}
                 animated={true}
               />
-            );
-          })()}
+            )}
 
-          {/* Quick actions for 1st Program */}
-          {memberships[0] && (() => {
-            const prog = programs.find(p => p.id === memberships[0].programId);
-            if (!prog) return null;
-            const isVisits = prog.programType === 'visits';
-            const current = isVisits ? memberships[0].currentVisits : memberships[0].currentPoints;
-            const canRedeem = current >= prog.goalValue;
-
-            return (
+            {/* Quick actions for Selected Program */}
+            {selectedMembership && (
               <div className="card-surface p-4 space-y-2">
-                <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Acciones ({prog.name})</h3>
+                <h3 className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-3">Acciones ({selectedMembership.program.name})</h3>
                 <button 
-                  onClick={() => addVisit(memberships[0].id)}
-                  className="btn-primary w-full justify-center text-sm"
+                  onClick={() => handleAction('visit')}
+                  disabled={isProcessing}
+                  className="btn-primary w-full justify-center text-sm disabled:opacity-50"
                 >
                   <Star size={14} />
                   Registrar visita
                 </button>
                 <button 
-                  onClick={() => redeemReward(memberships[0].id)}
-                  disabled={!canRedeem}
-                  className={`btn-secondary w-full justify-center text-sm ${!canRedeem ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  onClick={() => handleAction('redeem')}
+                  disabled={isProcessing || !selectedMembership.rewards.some(r => r.status === 'available')}
+                  className={cn(
+                    "btn-secondary w-full justify-center text-sm disabled:opacity-50",
+                    selectedMembership.rewards.some(r => r.status === 'available') ? "animate-pulse" : ""
+                  )}
                 >
                   <Gift size={14} />
                   Redimir recompensa
                 </button>
               </div>
-            );
-          })()}
-        </div>
+            )}
+          </div>
       </div>
     </div>
   );

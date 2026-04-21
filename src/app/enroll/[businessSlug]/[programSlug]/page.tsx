@@ -4,21 +4,76 @@ import { use, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, ArrowRight, Smartphone } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
-import { demoPrograms, demoBusiness } from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
+import { DemoProgramRepository, DemoCustomerRepository, DemoMembershipRepository } from '@/lib/repositories/demo-repository';
+import { DemoWalletAdapter } from '@/lib/wallet/demo-adapter';
 
 export default function EnrollPage({ params }: { params: Promise<{ businessSlug: string; programSlug: string }> }) {
   const { businessSlug, programSlug } = use(params);
   const [enrolled, setEnrolled] = useState(false);
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
+  const [passUrl, setPassUrl] = useState('');
 
-  // Demo: use first program that matches slug or fallback
-  const program = demoPrograms.find(p => p.slug === programSlug) || demoPrograms[0];
+  const { business, programs } = useAppStore();
 
-  const handleEnroll = (e: React.FormEvent) => {
+  // Find business and program from slugs
+  const targetBusiness = business?.slug === businessSlug ? business : null;
+  const program = programs.find(p => p.slug === programSlug);
+
+  const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!targetBusiness || !program) return;
+
+    const customerRepo = new DemoCustomerRepository();
+    const membershipRepo = new DemoMembershipRepository();
+    const wallet = new DemoWalletAdapter();
+
+    // 1. Create or get customer
+    const customer = await customerRepo.create({
+      businessId: targetBusiness.id,
+      fullName: name,
+      email: contact.includes('@') ? contact : undefined,
+      phone: !contact.includes('@') ? contact : undefined,
+    });
+
+    const serial = `ps_${Date.now()}`;
+
+    // 2. Create membership
+    const membership = await membershipRepo.create({
+      customerId: customer.id,
+      programId: program.id,
+      businessId: targetBusiness.id,
+      currentVisits: 0,
+      currentPoints: 0,
+      totalVisits: 0,
+      totalPoints: 0,
+      rewardsEarned: 0,
+      rewardsRedeemed: 0,
+      status: 'active',
+      passSerial: serial,
+      walletPlatform: 'none'
+    });
+
+    // 3. Create Demo Pass
+    const walletResult = await wallet.createPass({
+      serialNumber: serial,
+      customerName: name,
+      programName: program.name,
+      points: 0,
+      goal: program.goalValue,
+      reward: program.rewardDetail,
+      bgColor: program.passBgColor,
+      textColor: program.passTextColor
+    });
+
+    setPassUrl(walletResult.saveUrl);
     setEnrolled(true);
   };
+
+  if (!targetBusiness || !program) {
+    return <div className="min-h-screen flex items-center justify-center">Negocio o programa no encontrado</div>;
+  }
 
   if (enrolled) {
     return (
@@ -45,7 +100,7 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
 
           <div className="mb-6">
             <DigitalPassCard
-              businessName={demoBusiness.name}
+              businessName={targetBusiness.name}
               programName={program.name}
               customerName={name || 'Cliente'}
               currentValue={0}
@@ -59,16 +114,20 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
           </div>
 
           <div className="space-y-3">
-            <button className="btn-primary w-full !py-3 justify-center">
+            <button className="btn-primary w-full !py-3 justify-center" onClick={() => window.open(passUrl, '_blank')}>
+              <Smartphone size={16} />
+              Ver Pase Digital
+            </button>
+            <button className="btn-secondary w-full !py-3 justify-center opacity-60">
               <Smartphone size={16} />
               Agregar a Apple Wallet
             </button>
-            <button className="btn-secondary w-full !py-3 justify-center">
+            <button className="btn-secondary w-full !py-3 justify-center opacity-60">
               <Smartphone size={16} />
               Agregar a Google Wallet
             </button>
-            <p className="text-xs text-[var(--color-text-muted)] mt-3">
-              🎯 Modo demo — La integración real con Apple/Google Wallet requiere configuración adicional
+            <p className="text-xs text-[var(--color-text-muted)] mt-4">
+              ✨ Membresía registrada con éxito.
             </p>
           </div>
         </motion.div>
@@ -92,13 +151,13 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
             <span className="text-lg font-extrabold text-white/90">D</span>
           </div>
           <h1 className="text-xl font-bold">{program.name}</h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">{demoBusiness.name}</p>
+          <p className="text-sm text-[var(--color-text-secondary)]">{targetBusiness.name}</p>
         </div>
 
         {/* Preview card */}
         <div className="mb-6">
           <DigitalPassCard
-            businessName={demoBusiness.name}
+            businessName={targetBusiness.name}
             programName={program.name}
             currentValue={0}
             goalValue={program.goalValue}

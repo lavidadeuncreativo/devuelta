@@ -7,21 +7,117 @@ import {
   Zap, BarChart3, Download, Mail, Filter, CheckCircle2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import {
-  demoDashboardStats,
-  demoWeeklyVisits,
-  demoLocationStats,
-  demoProgramDistribution,
-  demoInsights,
-} from '@/lib/demo/data';
+import { useAppStore } from '@/lib/store';
+import { getProgramTypeLabel } from '@/lib/utils';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart as ReBarChart, Bar, PieChart, Pie, Cell,
 } from 'recharts';
 
 export default function AnalyticsPage() {
+  const { memberships, visits, redemptions, programs, locations } = useAppStore();
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+
+  // ── Calculation Logic ──
+  
+  // 1. Insights
+  const nearRewardCount = memberships.filter(m => {
+    const prog = programs.find(p => p.id === m.programId);
+    if (!prog) return false;
+    return prog.goalValue - m.currentVisits === 1;
+  }).length;
+
+  const weeklyRedemptionsCount = redemptions.filter(r => {
+    const rDate = new Date(r.redeemedAt);
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return rDate > weekAgo;
+  }).length;
+
+  const activeMembersCount = memberships.filter(m => m.totalVisits > 0).length;
+  const activationRate = memberships.length > 0 ? Math.round((activeMembersCount / memberships.length) * 100) : 0;
+
+  // Most active program
+  const programActivity = programs.map(p => ({
+    name: p.name,
+    count: visits.filter(v => {
+      const m = memberships.find(mem => mem.id === v.membershipId);
+      return m?.programId === p.id;
+    }).length
+  })).sort((a,b) => b.count - a.count);
+  const mostActiveProgram = programActivity[0]?.name || 'Ninguno';
+
+  // 2. Chart Data: Distribution
+  const programDistribution = programs.map((p, i) => ({
+    name: p.name,
+    value: memberships.filter(m => m.programId === p.id).length,
+    color: ['#7c3aed', '#ec4899', '#f59e0b', '#6366f1', '#10b981'][i % 5]
+  })).filter(p => p.value > 0);
+
+  // 3. Chart Data: Locations
+  const locationStats = locations.map(l => ({
+    location: l.name,
+    visits: visits.filter(v => v.locationId === l.id).length,
+    customers: new Set(memberships.filter(m => visits.some(v => v.membershipId === m.id && v.locationId === l.id)).map(m => m.customerId)).size,
+    redemptions: redemptions.filter(r => r.locationId === l.id).length
+  }));
+
+  // 4. Chart Data: Weekly Trend (Simulated buckets from real data)
+  const getWeeklyData = () => {
+    const weeks = [];
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - (i * 7));
+      const weekLabel = `S${12-i}`;
+      
+      const weeklyVisits = visits.filter(v => {
+        const vDate = new Date(v.createdAt);
+        const diff = (new Date().getTime() - vDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
+        return diff >= i && diff < i + 1;
+      }).length;
+
+      const weeklyEnrolls = memberships.filter(m => {
+        const mDate = new Date(m.enrolledAt);
+        const diff = (new Date().getTime() - mDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
+        return diff >= i && diff < i + 1;
+      }).length;
+
+      weeks.push({ week: weekLabel, visits: weeklyVisits, enrollments: weeklyEnrolls });
+    }
+    return weeks;
+  };
+  const weeklyTrends = getWeeklyData();
+
+  const handleExportCSV = () => {
+    // Basic CSV generation
+    const headers = ['ID Cliente', 'Email', 'Programa', 'Visitas Actuales', 'Total Visitas', 'Fecha Registro'];
+    const rows = memberships.map(m => {
+      const customer = useAppStore.getState().customers.find(c => c.id === m.customerId);
+      const program = programs.find(p => p.id === m.programId);
+      return [
+        m.customerId,
+        customer?.email || 'N/A',
+        program?.name || 'N/A',
+        m.currentVisits,
+        m.totalVisits,
+        new Date(m.enrolledAt).toLocaleDateString()
+      ].join(',');
+    });
+
+    const csvContent = [headers.join(','), ...rows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `devuelta_reporte_${new Date().toISOString().split('T')[0]}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    triggerAction('Descarga de CSV iniciada');
+  };
 
   const triggerAction = (msg: string) => {
     setToastMsg(msg);
@@ -66,7 +162,7 @@ export default function AnalyticsPage() {
             <Mail size={15} />
             Email
           </button>
-          <button onClick={() => triggerAction('Descarga de CSV iniciada')} className="btn-primary !py-2 px-3 text-sm">
+          <button onClick={handleExportCSV} className="btn-primary !py-2 px-3 text-sm">
             <Download size={15} />
             Exportar CSV
           </button>
@@ -78,7 +174,7 @@ export default function AnalyticsPage() {
         <InsightCard
           icon={Target}
           label="Cerca de recompensa"
-          value={demoInsights.nearReward}
+          value={nearRewardCount}
           detail="clientes a 1 visita"
           color="#f59e0b"
           delay={0}
@@ -86,16 +182,16 @@ export default function AnalyticsPage() {
         <InsightCard
           icon={Zap}
           label="Programa más activo"
-          value={0}
-          customValue={demoInsights.mostActiveProgram}
-          detail="más visitas esta semana"
+          value={1}
+          customValue={mostActiveProgram}
+          detail="más visitas históricas"
           color="var(--color-brand)"
           delay={0.05}
         />
         <InsightCard
           icon={Gift}
-          label="Canjes esta semana"
-          value={demoInsights.weeklyRedemptions}
+          label="Canjes (7 días)"
+          value={weeklyRedemptionsCount}
           detail="recompensas redimidas"
           color="#ec4899"
           delay={0.1}
@@ -103,7 +199,7 @@ export default function AnalyticsPage() {
         <InsightCard
           icon={TrendingUp}
           label="Tasa de activación"
-          value={demoInsights.activationRate}
+          value={activationRate}
           suffix="%"
           detail="clientes con ≥1 visita"
           color="#6366f1"
@@ -111,10 +207,9 @@ export default function AnalyticsPage() {
         />
         <InsightCard
           icon={Users}
-          label="Tasa de retorno"
-          value={demoInsights.returnRate}
-          suffix="%"
-          detail="regresan en 30 días"
+          label="Clientes Registrados"
+          value={useAppStore.getState().customers.length}
+          detail="en la base de datos"
           color="var(--color-brand)"
           delay={0.2}
         />
@@ -133,7 +228,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={demoWeeklyVisits}>
+              <AreaChart data={weeklyTrends}>
                 <defs>
                   <linearGradient id="gradVisits" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="oklch(0.65 0.18 165)" stopOpacity={0.3} />
@@ -202,7 +297,7 @@ export default function AnalyticsPage() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={demoProgramDistribution}
+                  data={programDistribution}
                   cx="50%"
                   cy="50%"
                   innerRadius={55}
@@ -211,7 +306,7 @@ export default function AnalyticsPage() {
                   dataKey="value"
                   stroke="none"
                 >
-                  {demoProgramDistribution.map((entry, index) => (
+                  {programDistribution.map((entry, index) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
                 </Pie>
@@ -228,7 +323,7 @@ export default function AnalyticsPage() {
             </ResponsiveContainer>
           </div>
           <div className="space-y-2 mt-3">
-            {demoProgramDistribution.map((item, i) => (
+            {programDistribution.map((item, i) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
@@ -248,7 +343,7 @@ export default function AnalyticsPage() {
           Rendimiento por sucursal
         </h3>
         <div className="grid sm:grid-cols-2 gap-4">
-          {demoLocationStats.map((loc, i) => (
+          {locationStats.map((loc, i) => (
             <motion.div
               key={i}
               className="bg-[var(--color-bg-primary)] rounded-xl p-4 border border-[var(--color-border-subtle)]"

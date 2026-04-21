@@ -1,45 +1,79 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LoyaltyProgram, Customer, Membership, Location as BranchLocation } from './types';
+import { 
+  LoyaltyProgram, 
+  Customer, 
+  Membership, 
+  Location as BranchLocation,
+  Business,
+  Visit,
+  Reward,
+  Redemption,
+  AuditLog
+} from './types';
 import { 
   demoPrograms, 
   demoCustomers, 
   demoMemberships, 
-  demoLocations 
+  demoLocations,
+  demoBusiness
 } from './demo/data';
 
 interface AppState {
+  business: Business | null;
   programs: LoyaltyProgram[];
   customers: Customer[];
   memberships: Membership[];
   locations: BranchLocation[];
+  visits: Visit[];
+  rewards: Reward[];
+  redemptions: Redemption[];
+  auditLogs: AuditLog[];
 
-  brandConfig: {
-    primaryColor: string;
-    secondaryColor: string;
-    logoUrl?: string;
+  // For Demo/Dev
+  settings: {
+    isDemo: boolean;
+    useLocalOnly: boolean;
   };
 
+  // Actions (Generic)
+  setBusiness: (business: Business) => void;
+  updateProgram: (id: string, updates: Partial<LoyaltyProgram>) => void;
   addProgram: (program: Omit<LoyaltyProgram, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  addCustomer: (customer: Omit<Customer, 'id' | 'joinedAt'>) => void;
-  addMembership: (membership: Omit<Membership, 'id' | 'enrolledAt' | 'lastVisitAt'>) => void;
-  addVisit: (membershipId: string, visitsToAdd?: number) => void;
-  redeemReward: (membershipId: string) => void;
+  addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  addMembership: (membership: Omit<Membership, 'id' | 'enrolledAt'>) => void;
+  updateMembership: (id: string, updates: Partial<Membership>) => void;
+  addVisitRecord: (visit: Omit<Visit, 'id' | 'createdAt'>) => void;
+  addRewardRecord: (reward: Omit<Reward, 'id' | 'unlockedAt'>) => void;
+  updateRewardRecord: (id: string, updates: Partial<Reward>) => void;
+  addRedemptionRecord: (redemption: Omit<Redemption, 'id' | 'redeemedAt'>) => void;
   addLocation: (location: Omit<BranchLocation, 'id' | 'createdAt'>) => void;
-  updateBrandConfig: (config: Partial<AppState['brandConfig']>) => void;
+  addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>) => void;
+  resetDemoData: () => void;
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
+      business: demoBusiness,
       programs: demoPrograms,
       customers: demoCustomers,
       memberships: demoMemberships,
       locations: demoLocations,
-      brandConfig: {
-        primaryColor: '#7c3aed',
-        secondaryColor: '#f0e6d3',
+      visits: [],
+      rewards: [],
+      redemptions: [],
+      auditLogs: [],
+      settings: {
+        isDemo: true,
+        useLocalOnly: true,
       },
+
+      setBusiness: (business) => set({ business }),
+
+      updateProgram: (id, updates) => set((state) => ({
+        programs: state.programs.map((p) => (p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p))
+      })),
 
       addProgram: (data) => set((state) => ({
         programs: [...state.programs, {
@@ -54,7 +88,8 @@ export const useAppStore = create<AppState>()(
         customers: [...state.customers, {
           ...data,
           id: `cus_${Date.now()}`,
-          joinedAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         }]
       })),
 
@@ -62,45 +97,28 @@ export const useAppStore = create<AppState>()(
         memberships: [...state.memberships, {
           ...data,
           id: `mem_${Date.now()}`,
-          enrolledAt: new Date().toISOString(),
-          lastVisitAt: new Date().toISOString()
+          enrolledAt: new Date().toISOString()
         }]
       })),
 
-      addVisit: (membershipId, visitsToAdd = 1) => set((state) => ({
-        memberships: state.memberships.map((m) => {
-          if (m.id === membershipId) {
-            return {
-              ...m,
-              currentVisits: m.currentVisits + visitsToAdd,
-              totalVisits: m.totalVisits + visitsToAdd,
-              lastVisitAt: new Date().toISOString()
-            };
-          }
-          return m;
-        })
+      updateMembership: (id, updates) => set((state) => ({
+        memberships: state.memberships.map((m) => (m.id === id ? { ...m, ...updates } : m))
       })),
 
-      redeemReward: (membershipId) => set((state) => ({
-        memberships: state.memberships.map((m) => {
-          if (m.id === membershipId) {
-            const prog = state.programs.find((p) => p.id === m.programId);
-            if (!prog) return m;
+      addVisitRecord: (data) => set((state) => ({
+        visits: [...state.visits, { ...data, id: `vst_${Date.now()}`, createdAt: new Date().toISOString() }]
+      })),
 
-            const isVisits = prog.programType === 'visits';
-            const canRedeem = (isVisits ? m.currentVisits : m.currentPoints) >= prog.goalValue;
-            
-            if (canRedeem) {
-              return {
-                ...m,
-                currentVisits: isVisits ? m.currentVisits - prog.goalValue : m.currentVisits,
-                currentPoints: !isVisits ? m.currentPoints - prog.goalValue : m.currentPoints,
-                rewardsRedeemed: m.rewardsRedeemed + 1
-              };
-            }
-          }
-          return m;
-        })
+      addRewardRecord: (data) => set((state) => ({
+        rewards: [...state.rewards, { ...data, id: `rwd_${Date.now()}`, unlockedAt: new Date().toISOString() }]
+      })),
+
+      updateRewardRecord: (id, updates) => set((state) => ({
+        rewards: state.rewards.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      })),
+
+      addRedemptionRecord: (data) => set((state) => ({
+        redemptions: [...state.redemptions, { ...data, id: `rdm_${Date.now()}`, redeemedAt: new Date().toISOString() }]
       })),
 
       addLocation: (data) => set((state) => ({
@@ -111,9 +129,21 @@ export const useAppStore = create<AppState>()(
         }]
       })),
 
-      updateBrandConfig: (config) => set((state) => ({
-        brandConfig: { ...state.brandConfig, ...config }
-      }))
+      addAuditLog: (data) => set((state) => ({
+        auditLogs: [...state.auditLogs, { ...data, id: `log_${Date.now()}`, createdAt: new Date().toISOString() }]
+      })),
+
+      resetDemoData: () => set({
+        business: demoBusiness,
+        programs: demoPrograms,
+        customers: demoCustomers,
+        memberships: demoMemberships,
+        locations: demoLocations,
+        visits: [],
+        rewards: [],
+        redemptions: [],
+        auditLogs: []
+      })
     }),
     {
       name: 'devuelta-demo-storage',

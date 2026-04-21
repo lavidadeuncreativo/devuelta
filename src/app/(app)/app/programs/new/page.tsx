@@ -13,6 +13,8 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { programTemplates } from '@/lib/demo/templates';
 import { cn, getBusinessTypeLabel } from '@/lib/utils';
 import type { ProgramTemplate } from '@/lib/types';
+import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
+import { useAppStore } from '@/lib/store';
 
 const iconMap: Record<string, React.ElementType> = {
   Coffee, Scissors, Sparkles, UtensilsCrossed, Croissant, Dumbbell, ShoppingBag, PawPrint,
@@ -50,9 +52,36 @@ export default function NewProgramPage() {
   const next = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   const back = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
-  const handleCreate = () => {
-    // Demo: just navigate back
-    router.push('/app/programs');
+  const handleCreate = async () => {
+    if (!selectedTemplate) return;
+
+    const programRepo = new DemoProgramRepository();
+    const businessId = useAppStore.getState().business?.id || 'biz_01';
+
+    try {
+      await programRepo.create({
+        businessId,
+        name: programName,
+        description: programDesc,
+        slug: programName.toLowerCase().replace(/\s+/g, '-'),
+        programType: selectedTemplate.programType,
+        status: 'active',
+        goalValue: goalValue,
+        rewardType: selectedTemplate.rewardType,
+        rewardDetail: rewardDetail,
+        enrollmentMode: 'open',
+        visitCooldownMinutes: 60, // Default for now
+        allowMultipleRewards: true,
+        isActive: true,
+        passBgColor: bgColor,
+        passTextColor: textColor
+      });
+
+      router.push('/app/programs?success=true');
+    } catch (error) {
+      console.error('Error creating program:', error);
+      alert('Hubo un error al crear el programa.');
+    }
   };
 
   return (

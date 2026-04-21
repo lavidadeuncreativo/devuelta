@@ -1,7 +1,8 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Users, Eye, Gift, Star, QrCode, Share2, Settings, Pause, X, Save } from 'lucide-react';
 import Link from 'next/link';
 import { demoPrograms, demoMemberships } from '@/lib/demo/data';
@@ -9,24 +10,46 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { getProgramTypeLabel } from '@/lib/utils';
 import type { LoyaltyProgram } from '@/lib/types';
 import { QRCodeSVG } from 'qrcode.react';
+import { useAppStore } from '@/lib/store';
+import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
 
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const initialProgram = demoPrograms.find(p => p.id === id) || demoPrograms[0];
+  const router = useRouter();
+  const { programs, memberships, business } = useAppStore();
+  
+  const initialProgram = programs.find((p) => p.id === id) || programs[0];
   
   // State for live editing
   const [isEditing, setIsEditing] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
-  const [program, setProgram] = useState<LoyaltyProgram>(initialProgram);
+  const [programData, setProgramData] = useState<LoyaltyProgram>(initialProgram);
   
-  const members = demoMemberships.filter(m => m.programId === program.id);
+  // Sync state if initialProgram changes (e.g., after a save or load)
+  useEffect(() => {
+    if (initialProgram) setProgramData(initialProgram);
+  }, [initialProgram]);
+
+  const members = memberships.filter(m => m.programId === initialProgram?.id);
   const totalVisits = members.reduce((s, m) => s + m.totalVisits, 0);
   const totalRedemptions = members.reduce((s, m) => s + m.rewardsRedeemed, 0);
 
-  const handleSave = () => {
-    // In a real app, this would be an API call
-    setIsEditing(false);
+  const handleSave = async () => {
+    const programRepo = new DemoProgramRepository();
+    try {
+      await programRepo.update(id, programData);
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating program:', error);
+      alert('Error al guardar los cambios.');
+    }
   };
+
+  if (!initialProgram) return <div className="p-8 text-center">Programa no encontrado</div>;
+
+  const currentProgram = isEditing ? programData : initialProgram;
+  const businessName = business?.name || 'Tu Negocio';
+  const businessSlug = business?.slug || 'demo-business';
 
   return (
     <div className="p-6 sm:p-8 max-w-5xl mx-auto pb-24">
@@ -44,28 +67,28 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="flex items-center justify-between mb-4">
-              <span className="badge badge-brand">{getProgramTypeLabel(program.programType)}</span>
-              <span className="badge badge-success">Activo</span>
+              <span className="badge badge-brand">{getProgramTypeLabel(currentProgram.programType)}</span>
+              <span className="badge badge-success">{currentProgram.status === 'active' ? 'Activo' : currentProgram.status}</span>
             </div>
             
             {isEditing ? (
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Nombre del Programa</label>
-                  <input type="text" className="input-field font-bold text-xl" value={program.name} onChange={e => setProgram({...program, name: e.target.value})} />
+                  <input type="text" className="input-field font-bold text-xl" value={programData.name} onChange={e => setProgramData({...programData, name: e.target.value})} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Recompensa</label>
-                  <input type="text" className="input-field" value={program.rewardDetail} onChange={e => setProgram({...program, rewardDetail: e.target.value})} />
+                  <input type="text" className="input-field" value={programData.rewardDetail} onChange={e => setProgramData({...programData, rewardDetail: e.target.value})} />
                 </div>
               </div>
             ) : (
               <>
-                <h1 className="text-2xl font-bold mb-2">{program.name}</h1>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-4">{program.description || 'Sin descripción'}</p>
+                <h1 className="text-2xl font-bold mb-2">{currentProgram.name}</h1>
+                <p className="text-sm text-[var(--color-text-secondary)] mb-4">{currentProgram.description || 'Sin descripción'}</p>
                 <div className="flex items-center gap-2 text-sm text-[var(--color-text-secondary)]">
                   <Gift size={14} className="text-[var(--color-brand)]" />
-                  <span>Recompensa: <span className="font-medium text-[var(--color-text)]">{program.rewardDetail}</span></span>
+                  <span>Recompensa: <span className="font-medium text-[var(--color-text)]">{currentProgram.rewardDetail}</span></span>
                 </div>
               </>
             )}
@@ -112,12 +135,12 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               <div className="space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Meta ({program.programType === 'visits' ? 'Visitas' : 'Puntos'})</label>
-                    <input type="number" min={1} className="input-field" value={program.goalValue} onChange={e => setProgram({...program, goalValue: Number(e.target.value)})} />
+                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Meta ({programData.programType === 'visits' ? 'Visitas' : 'Puntos'})</label>
+                    <input type="number" min={1} className="input-field" value={programData.goalValue} onChange={e => setProgramData({...programData, goalValue: Number(e.target.value)})} />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Cooldown (Minutos)</label>
-                    <input type="number" min={0} className="input-field" value={program.visitCooldownMinutes} onChange={e => setProgram({...program, visitCooldownMinutes: Number(e.target.value)})} />
+                    <input type="number" min={0} className="input-field" value={programData.visitCooldownMinutes} onChange={e => setProgramData({...programData, visitCooldownMinutes: Number(e.target.value)})} />
                   </div>
                 </div>
                 
@@ -125,21 +148,21 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Color Principal del Pase</label>
                     <div className="flex items-center gap-2">
-                      <input type="color" value={program.passBgColor} onChange={e => setProgram({...program, passBgColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
-                      <input type="text" className="input-field text-sm py-1.5" value={program.passBgColor} onChange={e => setProgram({...program, passBgColor: e.target.value})} />
+                      <input type="color" value={programData.passBgColor} onChange={e => setProgramData({...programData, passBgColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
+                      <input type="text" className="input-field text-sm py-1.5" value={programData.passBgColor} onChange={e => setProgramData({...programData, passBgColor: e.target.value})} />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Color de Texto del Pase</label>
                     <div className="flex items-center gap-2">
-                      <input type="color" value={program.passTextColor} onChange={e => setProgram({...program, passTextColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
-                      <input type="text" className="input-field text-sm py-1.5" value={program.passTextColor} onChange={e => setProgram({...program, passTextColor: e.target.value})} />
+                      <input type="color" value={programData.passTextColor} onChange={e => setProgramData({...programData, passTextColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
+                      <input type="text" className="input-field text-sm py-1.5" value={programData.passTextColor} onChange={e => setProgramData({...programData, passTextColor: e.target.value})} />
                     </div>
                   </div>
                 </div>
                 
                 <div className="pt-4 flex gap-3 justify-end border-t border-[var(--color-border-subtle)]">
-                  <button className="btn-ghost" onClick={() => { setProgram(initialProgram); setIsEditing(false); }}>
+                  <button className="btn-ghost" onClick={() => { setProgramData(initialProgram); setIsEditing(false); }}>
                     <X size={15} /> Cancelar
                   </button>
                   <button className="btn-primary" onClick={handleSave}>
@@ -151,23 +174,23 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               <div className="grid sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Tipo</p>
-                  <p>{getProgramTypeLabel(program.programType)}</p>
+                  <p>{getProgramTypeLabel(currentProgram.programType)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Meta</p>
-                  <p>{program.goalValue} {program.programType === 'visits' ? 'visitas' : 'puntos'}</p>
+                  <p>{currentProgram.goalValue} {currentProgram.programType === 'visits' ? 'visitas' : 'puntos'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Cooldown</p>
-                  <p>{program.visitCooldownMinutes > 0 ? `${program.visitCooldownMinutes} minutos` : 'Sin restricción'}</p>
+                  <p>{currentProgram.visitCooldownMinutes > 0 ? `${currentProgram.visitCooldownMinutes} minutos` : 'Sin restricción'}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Inscripción</p>
-                  <p className="capitalize">{program.enrollmentMode}</p>
+                  <p className="capitalize">{currentProgram.enrollmentMode}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[var(--color-text-muted)] mb-1">Creado por</p>
-                  <p>{program.createdBy || 'Sistema'}</p>
+                  <p>{currentProgram.createdBy || 'Sistema'}</p>
                 </div>
               </div>
             )}
@@ -187,15 +210,15 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               )}
             </div>
             <DigitalPassCard
-              businessName="Café Origen"
-              programName={program.name || 'Nombre del Programa'}
+              businessName={businessName}
+              programName={currentProgram.name || 'Nombre del Programa'}
               customerName="Cliente Demo"
-              currentValue={Math.min(3, Math.max(1, program.goalValue - 1))}
-              goalValue={program.goalValue || 5}
-              rewardDetail={program.rewardDetail || 'Tu recompensa'}
-              programType={program.programType}
-              bgColor={program.passBgColor}
-              textColor={program.passTextColor}
+              currentValue={Math.min(3, Math.max(1, currentProgram.goalValue - 1))}
+              goalValue={currentProgram.goalValue || 5}
+              rewardDetail={currentProgram.rewardDetail || 'Tu recompensa'}
+              programType={currentProgram.programType}
+              bgColor={currentProgram.passBgColor}
+              textColor={currentProgram.passTextColor}
               animated={true}
             />
           </div>
@@ -234,7 +257,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               </p>
               <div className="bg-white p-4 rounded-xl inline-block mx-auto mb-6">
                 <QRCodeSVG
-                  value={`https://devuelta.app/enroll/demo-business/${program.slug}`}
+                  value={`${window.location.origin}/enroll/${businessSlug}/${currentProgram.slug}`}
                   size={200}
                   level="H"
                   includeMargin={false}
