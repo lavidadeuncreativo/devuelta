@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { LoyaltyProgram, Customer, Membership, BranchLocation } from './types';
+import { LoyaltyProgram, Customer, Membership, Location as BranchLocation } from './types';
 import { 
   demoPrograms, 
   demoCustomers, 
@@ -71,7 +71,8 @@ export const useAppStore = create<AppState>()(
       addLocation: (data) => set((state) => ({
         locations: [...state.locations, {
           ...data,
-          id: `loc_${Date.now()}`
+          id: `loc_${Date.now()}`,
+          createdAt: new Date().toISOString()
         }]
       }))
     }),
