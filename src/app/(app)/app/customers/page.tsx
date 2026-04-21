@@ -2,13 +2,13 @@
 
 import { motion } from 'framer-motion';
 import { Search, UserPlus, Star, Gift, ChevronRight, Users as UsersIcon } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { demoCustomers, demoMemberships, demoPrograms } from '@/lib/demo/data';
 import { formatRelativeTime } from '@/lib/utils';
 
-export default function CustomersPage() {
+function CustomersList() {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
 
@@ -104,5 +104,13 @@ export default function CustomersPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CustomersPage() {
+  return (
+    <Suspense>
+      <CustomersList />
+    </Suspense>
   );
 }
