@@ -58,7 +58,6 @@ export default function LocationsSettingsPage() {
           </motion.div>
         ))}
       </div>
-      </div>
 
       <AnimatePresence>
         {showAddModal && (
