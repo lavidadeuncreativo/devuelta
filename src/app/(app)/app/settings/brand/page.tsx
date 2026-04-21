@@ -10,17 +10,25 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useAppStore } from '@/lib/store';
 
 export default function BrandSettingsPage() {
-  const { brandConfig, updateBrandConfig } = useAppStore();
+  const { business, setBusiness } = useAppStore();
   
-  const [name, setName] = useState(demoBusiness.name);
-  const [primaryColor, setPrimaryColor] = useState(brandConfig.primaryColor);
-  const [secondaryColor, setSecondaryColor] = useState(brandConfig.secondaryColor);
-  const [logoUrl, setLogoUrl] = useState<string | undefined>(brandConfig.logoUrl);
+  const [name, setName] = useState(business?.name || demoBusiness.name);
+  const [primaryColor, setPrimaryColor] = useState(business?.primaryColor || '#7c3aed');
+  const [secondaryColor, setSecondaryColor] = useState(business?.secondaryColor || '#ffffff');
+  const [logoUrl, setLogoUrl] = useState<string | undefined>(business?.logoUrl);
   const [stampIconUrl, setStampIconUrl] = useState<string | undefined>(undefined);
 
   const handleSave = () => {
-    updateBrandConfig({ primaryColor, secondaryColor, logoUrl });
-    // In a real app we would save this to the backend here
+    if (!business) return;
+    setBusiness({
+      ...business,
+      name,
+      primaryColor,
+      secondaryColor,
+      logoUrl,
+      updatedAt: new Date().toISOString()
+    });
+    alert('Cambios guardados localmente.');
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, setter: (url: string) => void) => {

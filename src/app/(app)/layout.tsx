@@ -22,7 +22,7 @@ const navItems = [
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { brandConfig } = useAppStore();
+  const { business } = useAppStore();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [globalSearch, setGlobalSearch] = useState('');
@@ -36,11 +36,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const primaryColor = business?.primaryColor || '#7c3aed';
+
   const customStyles = {
-    '--color-brand': brandConfig.primaryColor,
-    '--color-brand-light': brandConfig.primaryColor + 'e6',
-    '--color-brand-dark': brandConfig.primaryColor + 'cc',
-    '--color-brand-subtle': brandConfig.primaryColor + '15',
+    '--color-brand': primaryColor,
+    '--color-brand-light': primaryColor + 'e6',
+    '--color-brand-dark': primaryColor + 'cc',
+    '--color-brand-subtle': primaryColor + '15',
   } as React.CSSProperties;
 
   return (
