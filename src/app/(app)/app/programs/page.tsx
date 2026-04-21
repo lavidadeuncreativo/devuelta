@@ -29,6 +29,7 @@ export default function ProgramsPage() {
           const progMemberships = memberships.filter(m => m.programId === prog.id);
           const totalMembers = progMemberships.length;
           const activeMembers = progMemberships.filter(m => {
+            if (!m.lastVisitAt) return false;
             const date = new Date(m.lastVisitAt);
             const daysAgo = (Date.now() - date.getTime()) / (1000 * 3600 * 24);
             return daysAgo <= 30;
