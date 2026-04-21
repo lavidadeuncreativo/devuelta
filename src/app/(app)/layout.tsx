@@ -10,6 +10,7 @@ import {
   QrCode, Bell, Search, Menu, X, Megaphone,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
