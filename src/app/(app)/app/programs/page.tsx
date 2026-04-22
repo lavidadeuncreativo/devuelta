@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Star, Users, Eye, Gift, ArrowUpRight, X } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
+import { Membership, LoyaltyProgram } from '@/lib/types';
 
 export default function ProgramsPage() {
   const { programs, memberships, removeProgram } = useAppStore();
@@ -33,17 +34,17 @@ export default function ProgramsPage() {
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        {programs.map((prog, i) => {
-          const progMemberships = memberships.filter(m => m.programId === prog.id);
+        {programs.map((prog: LoyaltyProgram, i: number) => {
+          const progMemberships = memberships.filter((m: Membership) => m.programId === prog.id);
           const totalMembers = progMemberships.length;
-          const activeMembers = progMemberships.filter(m => {
+          const activeMembers = progMemberships.filter((m: Membership) => {
             if (!m.lastVisitAt) return false;
             const date = new Date(m.lastVisitAt);
             const daysAgo = (Date.now() - date.getTime()) / (1000 * 3600 * 24);
             return daysAgo <= 30;
           }).length;
-          const totalVisits = progMemberships.reduce((sum, m) => sum + m.totalVisits, 0);
-          const totalRedemptions = progMemberships.reduce((sum, m) => sum + m.rewardsEarned, 0);
+          const totalVisits = progMemberships.reduce((sum: number, m: Membership) => sum + m.totalVisits, 0);
+          const totalRedemptions = progMemberships.reduce((sum: number, m: Membership) => sum + m.rewardsEarned, 0);
 
           return (
             <motion.div

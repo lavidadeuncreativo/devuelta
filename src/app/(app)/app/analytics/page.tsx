@@ -327,7 +327,7 @@ export default function AnalyticsPage() {
                   dataKey="value"
                   stroke="none"
                 >
-                  {programDistribution.map((entry, index) => (
+                  {programDistribution.map((entry: { color: string }, index: number) => (
                     <Cell key={index} fill={entry.color} />
                   ))}
                 </Pie>
@@ -344,7 +344,7 @@ export default function AnalyticsPage() {
             </ResponsiveContainer>
           </div>
           <div className="space-y-2 mt-3">
-            {programDistribution.map((item, i) => (
+            {programDistribution.map((item: { name: string, value: number, color: string }, i: number) => (
               <div key={i} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2.5 h-2.5 rounded-full" style={{ background: item.color }} />
@@ -364,7 +364,7 @@ export default function AnalyticsPage() {
           Rendimiento por sucursal
         </h3>
         <div className="grid sm:grid-cols-2 gap-4">
-          {locationStats.map((loc, i) => (
+          {locationStats.map((loc: { location: string, visits: number, customers: number, redemptions: number }, i: number) => (
             <motion.div
               key={i}
               className="bg-[var(--color-bg-primary)] rounded-xl p-4 border border-[var(--color-border-subtle)]"

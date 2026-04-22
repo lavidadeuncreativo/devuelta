@@ -218,7 +218,7 @@ export default function OperationsPage() {
 
                 <div className="space-y-2">
                   <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-wider mb-2">Programas Activos</p>
-                  {customerMemberships.map((m) => (
+                  {customerMemberships.map((m: MembershipWithDetails) => (
                     <button
                       key={m.id}
                       className={cn(
@@ -237,7 +237,7 @@ export default function OperationsPage() {
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-[var(--color-text-secondary)]">Progreso: {m.currentVisits}/{m.program.goalValue}</span>
-                        {m.rewards.some(r => r.status === 'available') && (
+                        {m.rewards.some((r: any) => r.status === 'available') && (
                           <span className="flex items-center gap-1 text-emerald-400 font-bold animate-pulse">
                             <Gift size={12} /> ¡Canje listo!
                           </span>

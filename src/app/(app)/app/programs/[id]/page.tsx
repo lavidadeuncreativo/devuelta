@@ -111,7 +111,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                 { icon: Eye, label: 'Visitas', value: totalVisits, color: '#f59e0b' },
                 { icon: Gift, label: 'Canjes', value: totalRedemptions, color: '#ec4899' },
                 { icon: Star, label: 'Activos', value: members.filter((m: Membership) => m.status === 'active').length, color: '#6366f1' },
-              ].map((s, i) => (
+              ].map((s: { icon: any, label: string, value: number, color: string }, i: number) => (
                 <motion.div key={i} className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.05 }}>
                   <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ background: `${s.color}15` }}>
                     <s.icon size={14} style={{ color: s.color }} />
