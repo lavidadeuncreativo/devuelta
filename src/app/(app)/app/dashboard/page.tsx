@@ -156,7 +156,7 @@ export default function DashboardPage() {
               Visitas de clientes
             </h3>
             <div className="flex bg-[var(--color-bg-primary)] rounded-lg p-1 border border-[var(--color-border-subtle)]">
-              {(['daily', 'weekly', 'monthly'] as const).map((view: string) => (
+              {(['daily', 'weekly', 'monthly'] as const).map((view: 'daily' | 'weekly' | 'monthly') => (
                 <button
                   key={view}
                   onClick={() => setChartView(view)}
