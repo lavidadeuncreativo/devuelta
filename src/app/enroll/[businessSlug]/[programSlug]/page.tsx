@@ -60,11 +60,13 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
       serialNumber: serial,
       customerName: name,
       programName: program.name,
-      points: 0,
-      goal: program.goalValue,
-      reward: program.rewardDetail,
+      businessName: targetBusiness.name,
+      currentValue: 0,
+      goalValue: program.goalValue,
+      rewardDetail: program.rewardDetail,
       bgColor: program.passBgColor,
-      textColor: program.passTextColor
+      textColor: program.passTextColor,
+      barcode: { type: 'QR', value: `${window.location.origin}/pass/${serial}` }
     });
 
     setPassUrl(walletResult.saveUrl);
