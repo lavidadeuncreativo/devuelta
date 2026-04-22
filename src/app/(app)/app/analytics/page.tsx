@@ -22,7 +22,7 @@ export default function AnalyticsPage() {
   const [timeframe, setTimeframe] = useState('7d');
 
   // Filter helpers
-  const filterByTimeframe = <T extends { createdAt?: string; enrolledAt?: string; redeemedAt?: string }>(items: T[]) => {
+  const filterByTimeframe = <T extends { createdAt?: string; enrolledAt?: string; redeemedAt?: string }>(items: T[]): T[] => {
     const now = new Date();
     const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
     const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
@@ -34,9 +34,9 @@ export default function AnalyticsPage() {
     });
   };
 
-  const filteredVisits = filterByTimeframe(visits);
-  const filteredMemberships = filterByTimeframe(memberships);
-  const filteredRedemptions = filterByTimeframe(redemptions);
+  const filteredVisits = filterByTimeframe<Visit>(visits);
+  const filteredMemberships = filterByTimeframe<Membership>(memberships);
+  const filteredRedemptions = filterByTimeframe<Redemption>(redemptions);
 
   // ── Calculation Logic ──
   
