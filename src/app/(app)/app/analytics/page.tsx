@@ -9,6 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
+import { Membership, Visit, Redemption, LoyaltyProgram, Location as BranchLocation } from '@/lib/types';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart as ReBarChart, Bar, PieChart, Pie, Cell,
@@ -26,7 +27,7 @@ export default function AnalyticsPage() {
     const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
     const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     
-    return items.filter(item => {
+    return items.filter((item: T) => {
       const dateStr = item.createdAt || item.enrolledAt || item.redeemedAt;
       if (!dateStr) return false;
       return new Date(dateStr) >= limit;
@@ -40,40 +41,40 @@ export default function AnalyticsPage() {
   // ── Calculation Logic ──
   
   // 1. Insights
-  const nearRewardCount = memberships.filter(m => {
-    const prog = programs.find(p => p.id === m.programId);
+  const nearRewardCount = memberships.filter((m: Membership) => {
+    const prog = programs.find((p: LoyaltyProgram) => p.id === m.programId);
     if (!prog) return false;
     return prog.goalValue - m.currentVisits === 1;
   }).length;
 
   const weeklyRedemptionsCount = filteredRedemptions.length;
 
-  const activeMembersCount = memberships.filter(m => m.totalVisits > 0).length;
+  const activeMembersCount = memberships.filter((m: Membership) => m.totalVisits > 0).length;
   const activationRate = memberships.length > 0 ? Math.round((activeMembersCount / memberships.length) * 100) : 0;
 
   // Most active program
-  const programActivity = programs.map(p => ({
+  const programActivity = programs.map((p: LoyaltyProgram) => ({
     name: p.name,
-    count: filteredVisits.filter(v => {
-      const m = memberships.find(mem => mem.id === v.membershipId);
+    count: filteredVisits.filter((v: Visit) => {
+      const m = memberships.find((mem: Membership) => mem.id === v.membershipId);
       return m?.programId === p.id;
     }).length
   })).sort((a,b) => b.count - a.count);
   const mostActiveProgram = programActivity[0]?.name || 'Ninguno';
 
   // 2. Chart Data: Distribution
-  const programDistribution = programs.map((p, i) => ({
+  const programDistribution = programs.map((p: LoyaltyProgram, i: number) => ({
     name: p.name,
-    value: memberships.filter(m => m.programId === p.id).length,
+    value: memberships.filter((m: Membership) => m.programId === p.id).length,
     color: ['#7c3aed', '#ec4899', '#f59e0b', '#6366f1', '#10b981'][i % 5]
   })).filter(p => p.value > 0);
 
   // 3. Chart Data: Locations
-  const locationStats = locations.map(l => ({
+  const locationStats = locations.map((l: BranchLocation) => ({
     location: l.name,
-    visits: visits.filter(v => v.locationId === l.id).length,
-    customers: new Set(memberships.filter(m => visits.some(v => v.membershipId === m.id && v.locationId === l.id)).map(m => m.customerId)).size,
-    redemptions: redemptions.filter(r => r.locationId === l.id).length
+    visits: visits.filter((v: Visit) => v.locationId === l.id).length,
+    customers: new Set(memberships.filter((m: Membership) => visits.some((v: Visit) => v.membershipId === m.id && v.locationId === l.id)).map((m: Membership) => m.customerId)).size,
+    redemptions: redemptions.filter((r: Redemption) => r.locationId === l.id).length
   }));
 
   // 4. Chart Data: Weekly Trend (Simulated buckets from real data)
@@ -84,13 +85,13 @@ export default function AnalyticsPage() {
       date.setDate(date.getDate() - (i * 7));
       const weekLabel = `S${12-i}`;
       
-      const weeklyVisits = visits.filter(v => {
+      const weeklyVisits = visits.filter((v: Visit) => {
         const vDate = new Date(v.createdAt);
         const diff = (new Date().getTime() - vDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
         return diff >= i && diff < i + 1;
       }).length;
 
-      const weeklyEnrolls = memberships.filter(m => {
+      const weeklyEnrolls = memberships.filter((m: Membership) => {
         const mDate = new Date(m.enrolledAt);
         const diff = (new Date().getTime() - mDate.getTime()) / (1000 * 60 * 60 * 24 * 7);
         return diff >= i && diff < i + 1;
@@ -105,9 +106,9 @@ export default function AnalyticsPage() {
   const handleExportCSV = () => {
     // Basic CSV generation
     const headers = ['ID Cliente', 'Email', 'Programa', 'Visitas Actuales', 'Total Visitas', 'Fecha Registro'];
-    const rows = memberships.map(m => {
+    const rows = memberships.map((m: Membership) => {
       const customer = useAppStore.getState().customers.find(c => c.id === m.customerId);
-      const program = programs.find(p => p.id === m.programId);
+      const program = programs.find((p: LoyaltyProgram) => p.id === m.programId);
       return [
         m.customerId,
         customer?.email || 'N/A',
