@@ -8,10 +8,9 @@ import Link from 'next/link';
 import { demoPrograms, demoMemberships } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { getProgramTypeLabel } from '@/lib/utils';
-import type { LoyaltyProgram } from '@/lib/types';
-import { QRCodeSVG } from 'qrcode.react';
 import { useAppStore } from '@/lib/store';
 import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
+import { Membership, LoyaltyProgram, Customer } from '@/lib/types';
 
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -31,9 +30,9 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
     if (initialProgram) setProgramData(initialProgram);
   }, [initialProgram]);
 
-  const members = memberships.filter(m => m.programId === initialProgram?.id);
-  const totalVisits = members.reduce((s, m) => s + m.totalVisits, 0);
-  const totalRedemptions = members.reduce((s, m) => s + m.rewardsRedeemed, 0);
+  const members = memberships.filter((m: Membership) => m.programId === initialProgram?.id);
+  const totalVisits = members.reduce((s: number, m: Membership) => s + m.totalVisits, 0);
+  const totalRedemptions = members.reduce((s: number, m: Membership) => s + m.rewardsRedeemed, 0);
 
   const handleSave = async () => {
     const programRepo = new DemoProgramRepository();
@@ -111,7 +110,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                 { icon: Users, label: 'Miembros', value: members.length, color: 'var(--color-brand)' },
                 { icon: Eye, label: 'Visitas', value: totalVisits, color: '#f59e0b' },
                 { icon: Gift, label: 'Canjes', value: totalRedemptions, color: '#ec4899' },
-                { icon: Star, label: 'Activos', value: members.filter(m => m.status === 'active').length, color: '#6366f1' },
+                { icon: Star, label: 'Activos', value: members.filter((m: Membership) => m.status === 'active').length, color: '#6366f1' },
               ].map((s, i) => (
                 <motion.div key={i} className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.05 }}>
                   <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ background: `${s.color}15` }}>
@@ -290,8 +289,8 @@ function GiveawayControlCenter({ programId, rewardDetail, programName }: { progr
   const [shuffleName, setShuffleName] = useState<string | null>(null);
   const [winner, setWinner] = useState<{ name: string; id: string } | null>(null);
 
-  const participants = memberships.filter(m => m.programId === programId && m.currentVisits > 0);
-  const totalTickets = participants.reduce((acc, m) => acc + m.currentVisits, 0);
+  const participants = memberships.filter((m: Membership) => m.programId === programId && m.currentVisits > 0);
+  const totalTickets = participants.reduce((acc: number, m: Membership) => acc + m.currentVisits, 0);
 
   const handleStartDraw = async () => {
     if (participants.length === 0) return;
@@ -305,7 +304,7 @@ function GiveawayControlCenter({ programId, rewardDetail, programName }: { progr
 
     const shuffleInterval = setInterval(() => {
       const randomMember = participants[Math.floor(Math.random() * participants.length)];
-      const customer = customers.find(c => c.id === randomMember.customerId);
+      const customer = customers.find((c: Customer) => c.id === randomMember.customerId);
       setShuffleName(customer?.fullName || 'Anon');
       
       if (Date.now() - startTime > duration) {
