@@ -21,22 +21,25 @@ export default function AnalyticsPage() {
   const [toastMsg, setToastMsg] = useState('');
   const [timeframe, setTimeframe] = useState('7d');
 
-  // Filter helpers
-  const filterByTimeframe = <T,>(items: T[], dateField: keyof T): T[] => {
-    const now = new Date();
-    const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
-    const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
-    
-    return items.filter((item: T) => {
-      const dateStr = item[dateField] as unknown as string;
-      if (!dateStr) return false;
-      return new Date(dateStr) >= limit;
-    });
-  };
+  // 1. Filtered Data by Timeframe
+  const now = new Date();
+  const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
+  const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
 
-  const filteredVisits = filterByTimeframe(visits, 'createdAt');
-  const filteredMemberships = filterByTimeframe(memberships, 'enrolledAt');
-  const filteredRedemptions = filterByTimeframe(redemptions, 'redeemedAt');
+  const filteredVisits: Visit[] = visits.filter((v: Visit) => {
+    const d = new Date(v.createdAt);
+    return d >= limit;
+  });
+
+  const filteredMemberships: Membership[] = memberships.filter((m: Membership) => {
+    const d = new Date(m.enrolledAt);
+    return d >= limit;
+  });
+
+  const filteredRedemptions: Redemption[] = redemptions.filter((r: Redemption) => {
+    const d = new Date(r.redeemedAt);
+    return d >= limit;
+  });
 
   // ── Calculation Logic ──
   
