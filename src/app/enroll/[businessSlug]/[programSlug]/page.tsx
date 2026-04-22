@@ -69,7 +69,7 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
       barcode: { type: 'QR', value: `${window.location.origin}/pass/${serial}` }
     });
 
-    setPassUrl(walletResult.saveUrl);
+    setPassUrl(walletResult.saveUrl || '');
     setEnrolled(true);
   };
 
