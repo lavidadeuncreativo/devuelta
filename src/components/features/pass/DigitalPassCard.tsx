@@ -111,9 +111,10 @@ export function DigitalPassCard({
       {/* Holographic Glare Overlay */}
       {animated && (
         <motion.div 
-          className="absolute inset-0 pointer-events-none opacity-40 mix-blend-color-dodge mix-blend-overlay z-20"
+          className="absolute inset-0 pointer-events-none opacity-50 mix-blend-soft-light z-20"
           style={{
-            background: `radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.4), transparent 60%)`,
+            background: `radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.6), transparent 50%), 
+                         linear-gradient(135deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)`,
           }}
         />
       )}
@@ -130,9 +131,9 @@ export function DigitalPassCard({
         <div className="flex items-start justify-between mb-6">
           <div className="flex items-center gap-3">
             {logoUrl && (
-              <div className={cn("rounded-lg overflow-hidden shrink-0 flex items-center justify-center bg-white/10", compact ? "w-10 h-10" : "w-12 h-12")}>
+              <div className={cn("shrink-0 flex items-center justify-center", compact ? "w-10 h-10" : "w-12 h-12")}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
+                <img src={logoUrl} alt="Logo" className="w-full h-full object-contain filter drop-shadow-md" />
               </div>
             )}
             <div>
@@ -215,8 +216,8 @@ export function DigitalPassCard({
                     compact ? 'rounded-lg' : 'rounded-xl'
                   )}
                   style={{
-                    background: filled ? `${textColor}20` : `${textColor}08`,
-                    border: `1px solid ${filled ? `${textColor}35` : `${textColor}12`}`,
+                    background: stampIconUrl ? 'transparent' : (filled ? `${textColor}20` : `${textColor}08`),
+                    border: stampIconUrl ? 'none' : `1px solid ${filled ? `${textColor}35` : `${textColor}12`}`,
                   }}
                   initial={animated ? { opacity: 0, scale: 0.5 } : false}
                   animate={{ opacity: 1, scale: 1 }}

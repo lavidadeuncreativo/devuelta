@@ -55,7 +55,7 @@ export function HeroSection() {
             >
               <span className="w-2 h-2 rounded-full bg-[var(--color-brand)] animate-pulse-brand" />
               <span className="text-xs font-semibold text-[var(--color-text-secondary)] tracking-wide uppercase">
-                Lealtad digital sin app propia
+                Fidelización Premium. Sin fricción.
               </span>
             </motion.div>
 
@@ -67,10 +67,10 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               <span className="block text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold tracking-[-0.03em] leading-[1.08]">
-                Haz que tus clientes
+                La tarjeta de lealtad que sus
               </span>
               <span className="block text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold tracking-[-0.03em] leading-[1.08] mt-1">
-                <span className="font-display italic text-[var(--color-brand)]">regresen</span>.
+                clientes <span className="font-display italic text-[var(--color-brand)]">amarán</span> cargar.
               </span>
             </motion.h1>
 
@@ -81,10 +81,10 @@ export function HeroSection() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              Crea programas de lealtad digitales que tus clientes guardan en su{' '}
-              <span className="text-[var(--color-text)] font-medium">Apple Wallet</span> o{' '}
+              Reemplaza las tarjetas de cartón y las apps estorbosas por un pase digital elegante
+              en <span className="text-[var(--color-text)] font-medium">Apple Wallet</span> y{' '}
               <span className="text-[var(--color-text)] font-medium">Google Wallet</span>.
-              Sin tarjetas físicas. Sin app. Solo resultados.
+              Fideliza con un solo scan.
             </motion.p>
 
             {/* CTAs */}

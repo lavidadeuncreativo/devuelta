@@ -18,6 +18,24 @@ export default function AnalyticsPage() {
   const { memberships, visits, redemptions, programs, locations } = useAppStore();
   const [showToast, setShowToast] = useState(false);
   const [toastMsg, setToastMsg] = useState('');
+  const [timeframe, setTimeframe] = useState('7d');
+
+  // Filter helpers
+  const filterByTimeframe = <T extends { createdAt?: string; enrolledAt?: string; redeemedAt?: string }>(items: T[]) => {
+    const now = new Date();
+    const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
+    const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    
+    return items.filter(item => {
+      const dateStr = item.createdAt || item.enrolledAt || item.redeemedAt;
+      if (!dateStr) return false;
+      return new Date(dateStr) >= limit;
+    });
+  };
+
+  const filteredVisits = filterByTimeframe(visits);
+  const filteredMemberships = filterByTimeframe(memberships);
+  const filteredRedemptions = filterByTimeframe(redemptions);
 
   // ── Calculation Logic ──
   
@@ -28,12 +46,7 @@ export default function AnalyticsPage() {
     return prog.goalValue - m.currentVisits === 1;
   }).length;
 
-  const weeklyRedemptionsCount = redemptions.filter(r => {
-    const rDate = new Date(r.redeemedAt);
-    const weekAgo = new Date();
-    weekAgo.setDate(weekAgo.getDate() - 7);
-    return rDate > weekAgo;
-  }).length;
+  const weeklyRedemptionsCount = filteredRedemptions.length;
 
   const activeMembersCount = memberships.filter(m => m.totalVisits > 0).length;
   const activationRate = memberships.length > 0 ? Math.round((activeMembersCount / memberships.length) * 100) : 0;
@@ -41,7 +54,7 @@ export default function AnalyticsPage() {
   // Most active program
   const programActivity = programs.map(p => ({
     name: p.name,
-    count: visits.filter(v => {
+    count: filteredVisits.filter(v => {
       const m = memberships.find(mem => mem.id === v.membershipId);
       return m?.programId === p.id;
     }).length
@@ -150,11 +163,15 @@ export default function AnalyticsPage() {
         </div>
         <div className="flex items-center gap-2 lg:gap-3">
           <div className="relative">
-            <select className="input-field !py-2 !pl-9 !pr-8 text-sm appearance-none bg-[var(--color-bg-secondary)] border-none">
-              <option>Últimos 7 días</option>
-              <option>Último mes</option>
-              <option>Último trimestre</option>
-              <option>Este año</option>
+            <select 
+              value={timeframe}
+              onChange={(e) => setTimeframe(e.target.value)}
+              className="input-field !py-2 !pl-9 !pr-8 text-sm appearance-none bg-[var(--color-bg-secondary)] border-none cursor-pointer"
+            >
+              <option value="7d">Últimos 7 días</option>
+              <option value="30d">Último mes</option>
+              <option value="90d">Últimos 3 meses</option>
+              <option value="365d">Este año</option>
             </select>
             <Filter size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] pointer-events-none" />
           </div>
@@ -291,7 +308,7 @@ export default function AnalyticsPage() {
         <div className="card-surface p-5">
           <h3 className="text-sm font-semibold mb-5 flex items-center gap-2">
             <Eye size={15} className="text-[var(--color-brand)]" />
-            Distribución por programa
+            Distribución por tarjeta
           </h3>
           <div className="h-48 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">

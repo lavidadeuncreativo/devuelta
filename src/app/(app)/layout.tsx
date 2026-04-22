@@ -14,7 +14,8 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { href: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-  { href: '/app/programs', icon: Star, label: 'Programas' },
+  { href: '/app/programs', icon: Star, label: 'Tarjetas' },
+  { href: '/app/operations', icon: QrCode, label: 'Operaciones' },
   { href: '/app/customers', icon: Users, label: 'Clientes' },
   { href: '/app/marketing', icon: Megaphone, label: 'Marketing' },
   { href: '/app/analytics', icon: BarChart3, label: 'Analytics' },

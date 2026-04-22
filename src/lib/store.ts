@@ -43,6 +43,7 @@ interface AppState {
   setBusiness: (business: Business) => void;
   updateProgram: (id: string, updates: Partial<LoyaltyProgram>) => void;
   addProgram: (program: Omit<LoyaltyProgram, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  removeProgram: (id: string) => void;
   addCustomer: (customer: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => void;
   addMembership: (membership: Omit<Membership, 'id' | 'enrolledAt'>) => void;
   updateMembership: (id: string, updates: Partial<Membership>) => void;
@@ -51,6 +52,8 @@ interface AppState {
   updateRewardRecord: (id: string, updates: Partial<Reward>) => void;
   addRedemptionRecord: (redemption: Omit<Redemption, 'id' | 'redeemedAt'>) => void;
   addLocation: (location: Omit<BranchLocation, 'id' | 'createdAt'>) => void;
+  updateLocation: (id: string, updates: Partial<BranchLocation>) => void;
+  removeLocation: (id: string) => void;
   addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>) => void;
   setUsers: (users: User[]) => void;
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
@@ -88,6 +91,10 @@ export const useAppStore = create<AppState>()(
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
         }]
+      })),
+      
+      removeProgram: (id) => set((state) => ({
+        programs: state.programs.filter((p) => p.id !== id)
       })),
 
       addCustomer: (data) => set((state) => ({
@@ -133,6 +140,14 @@ export const useAppStore = create<AppState>()(
           id: `loc_${Date.now()}`,
           createdAt: new Date().toISOString()
         }]
+      })),
+
+      updateLocation: (id, updates) => set((state) => ({
+        locations: state.locations.map((l) => (l.id === id ? { ...l, ...updates } : l))
+      })),
+
+      removeLocation: (id) => set((state) => ({
+        locations: state.locations.filter((l) => l.id !== id)
       })),
 
       addAuditLog: (data) => set((state) => ({

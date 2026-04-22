@@ -21,15 +21,16 @@ const iconMap: Record<string, React.ElementType> = {
 };
 
 const steps = [
-  { id: 'template', label: 'Explorar plantillas', icon: Gift },
+  { id: 'type', label: 'Elegir tipo', icon: Star },
+  { id: 'template', label: 'Plantilla', icon: Gift },
   { id: 'customize', label: 'Personalizar', icon: Palette },
-  { id: 'preview', label: 'Vista previa', icon: Eye },
+  { id: 'preview', label: 'Finalizar', icon: Eye },
 ];
 
 export default function NewProgramPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedType, setSelectedType] = useState('');
+  const [dynamicType, setDynamicType] = useState<'loyalty' | 'giveaway'>('loyalty');
   const [selectedTemplate, setSelectedTemplate] = useState<ProgramTemplate | null>(null);
   const [programName, setProgramName] = useState('');
   const [programDesc, setProgramDesc] = useState('');
@@ -46,31 +47,30 @@ export default function NewProgramPage() {
     setRewardDetail(template.rewardDetail);
     setBgColor(template.passBgColor);
     setTextColor(template.passTextColor);
-    setCurrentStep(1);
+    setCurrentStep(2);
   };
 
   const next = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
   const back = () => setCurrentStep(prev => Math.max(prev - 1, 0));
 
   const handleCreate = async () => {
-    if (!selectedTemplate) return;
-
-    const programRepo = new DemoProgramRepository();
     const businessId = useAppStore.getState().business?.id || 'biz_01';
+    const { addProgram } = useAppStore.getState();
 
     try {
-      await programRepo.create({
+      addProgram({
         businessId,
         name: programName,
         description: programDesc,
         slug: programName.toLowerCase().replace(/\s+/g, '-'),
-        programType: selectedTemplate.programType,
+        programType: selectedTemplate?.programType || 'visits',
+        dynamicType: dynamicType,
         status: 'active',
         goalValue: goalValue,
-        rewardType: selectedTemplate.rewardType,
+        rewardType: selectedTemplate?.rewardType || 'free_item',
         rewardDetail: rewardDetail,
         enrollmentMode: 'open',
-        visitCooldownMinutes: 60, // Default for now
+        visitCooldownMinutes: 60,
         allowMultipleRewards: true,
         isActive: true,
         passBgColor: bgColor,
@@ -80,7 +80,7 @@ export default function NewProgramPage() {
       router.push('/app/programs?success=true');
     } catch (error) {
       console.error('Error creating program:', error);
-      alert('Hubo un error al crear el programa.');
+      alert('Hubo un error al crear la tarjeta.');
     }
   };
 
@@ -90,11 +90,11 @@ export default function NewProgramPage() {
       <div className="mb-8">
         <button onClick={() => router.back()} className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] mb-4 transition-colors">
           <ArrowLeft size={14} />
-          Volver a programas
+          Volver a tarjetas
         </button>
-        <h1 className="text-2xl font-bold tracking-tight">Nuevo programa</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Nueva Tarjeta</h1>
         <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-          Crea un programa de lealtad en minutos.
+          Crea una nueva dinámica de lealtad o sorteo en segundos.
         </p>
       </div>
 
@@ -128,125 +128,99 @@ export default function NewProgramPage() {
 
       {/* Step content */}
       <AnimatePresence mode="wait">
-        {/* Step 1: Template selection */}
+        {/* Step 0: Type Selection */}
         {currentStep === 0 && (
-          <motion.div
-            key="step-0"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h2 className="text-lg font-semibold mb-2">Selecciona una plantilla</h2>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-              Empieza rápido con una base probada. Podrás personalizar nombre, colores y recompensas en el siguiente paso.
-            </p>
+          <motion.div key="step-0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <h2 className="text-lg font-semibold mb-4">¿Qué tipo de dinámica quieres crear?</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <button 
+                onClick={() => { setDynamicType('loyalty'); next(); }}
+                className="card-interactive p-6 text-left border-2 border-transparent hover:border-[var(--color-brand)]"
+              >
+                <div className="w-12 h-12 rounded-xl bg-green-500/10 text-green-500 flex items-center justify-center mb-4">
+                  <Star size={24} />
+                </div>
+                <h3 className="font-bold mb-1">Tarjeta de Lealtad</h3>
+                <p className="text-sm text-[var(--color-text-secondary)]">Acumula sellos o puntos para obtener recompensas. Ideal para recurrencia.</p>
+              </button>
+              <button 
+                onClick={() => { setDynamicType('giveaway'); next(); }}
+                className="card-interactive p-6 text-left border-2 border-transparent hover:border-[var(--color-brand)]"
+              >
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center mb-4">
+                  <Gift size={24} />
+                </div>
+                <h3 className="font-bold mb-1">Tarjeta de Sorteo / Giveaway</h3>
+                <p className="text-sm text-[var(--color-text-secondary)]">Reparte boletos digitales por cada visita. Realiza sorteos entre tus clientes.</p>
+              </button>
+            </div>
+          </motion.div>
+        )}
 
+        {/* Step 1: Template selection */}
+        {currentStep === 1 && (
+          <motion.div key="step-1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+            <h2 className="text-lg font-semibold mb-2">Selecciona una plantilla</h2>
             <div className="grid sm:grid-cols-2 gap-4">
               {programTemplates.map((template) => (
-                <button
-                  key={template.name}
-                  onClick={() => handleSelectTemplate(template)}
-                  className="card-interactive p-5 text-left group"
-                >
+                <button key={template.name} onClick={() => handleSelectTemplate(template)} className="card-interactive p-5 text-left group">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-subtle)] flex items-center justify-center shrink-0 transition-transform group-hover:scale-110">
-                      {iconMap[template.icon] && (() => {
-                        const Icon = iconMap[template.icon];
-                        return <Icon size={22} className="text-[var(--color-brand)]" />;
-                      })()}
+                    <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-subtle)] flex items-center justify-center shrink-0">
+                      {iconMap[template.icon] && React.createElement(iconMap[template.icon], { size: 22, className: "text-[var(--color-brand)]" })}
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold mb-1 group-hover:text-[var(--color-brand)] transition-colors">{template.name}</h3>
-                      <p className="text-sm text-[var(--color-text-secondary)] mb-3">{template.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="badge badge-brand">{template.programType === 'visits' ? 'Visitas' : 'Puntos'}</span>
-                        <span className="badge badge-muted">Meta: {template.goalValue}</span>
-                      </div>
+                      <h3 className="text-lg font-semibold mb-1">{template.name}</h3>
+                      <p className="text-sm text-[var(--color-text-secondary)]">{template.description}</p>
                     </div>
                   </div>
                 </button>
               ))}
             </div>
+            <button onClick={back} className="btn-secondary mt-8">Atrás</button>
           </motion.div>
         )}
 
         {/* Step 2: Customize */}
-        {currentStep === 1 && (
-          <motion.div
-            key="step-2"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
+        {currentStep === 2 && (
+          <motion.div key="step-2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <div className="grid lg:grid-cols-2 gap-8">
-              <div>
-                <h2 className="text-lg font-semibold mb-2">Personaliza tu programa</h2>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-6">
-                  Ajusta el nombre, la meta y la recompensa a tu negocio.
-                </p>
-
-                <div className="space-y-4">
+              <div className="space-y-4">
+                <h2 className="text-lg font-semibold">Personaliza los detalles</h2>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre de la {dynamicType === 'loyalty' ? 'Tarjeta' : 'Dinámica'}</label>
+                  <input type="text" className="input-field" value={programName} onChange={e => setProgramName(e.target.value)} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Meta ({selectedTemplate?.programType === 'visits' ? 'visitas' : 'puntos'})</label>
+                  <input type="number" className="input-field" value={goalValue} onChange={e => setGoalValue(parseInt(e.target.value) || 1)} min={1} />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Recompensa / Premio</label>
+                  <input type="text" className="input-field" value={rewardDetail} onChange={e => setRewardDetail(e.target.value)} />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre del programa</label>
-                    <input type="text" className="input-field" value={programName} onChange={e => setProgramName(e.target.value)} />
+                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Fondo</label>
+                    <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Descripción corta</label>
-                    <textarea className="input-field !min-h-[80px] resize-none" value={programDesc} onChange={e => setProgramDesc(e.target.value)} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">
-                      Meta ({selectedTemplate?.programType === 'visits' ? 'visitas' : 'puntos'})
-                    </label>
-                    <input type="number" className="input-field" value={goalValue} onChange={e => setGoalValue(parseInt(e.target.value) || 1)} min={1} />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Recompensa</label>
-                    <input type="text" className="input-field" value={rewardDetail} onChange={e => setRewardDetail(e.target.value)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color de fondo del pase</label>
-                      <div className="flex items-center gap-2">
-                        <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
-                        <input type="text" className="input-field flex-1" value={bgColor} onChange={e => setBgColor(e.target.value)} />
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color de texto del pase</label>
-                      <div className="flex items-center gap-2">
-                        <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
-                        <input type="text" className="input-field flex-1" value={textColor} onChange={e => setTextColor(e.target.value)} />
-                      </div>
-                    </div>
+                    <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Texto</label>
+                    <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
                   </div>
                 </div>
-
-                <div className="flex gap-3 mt-6">
-                  <button onClick={back} className="btn-secondary">
-                    <ArrowLeft size={15} />
-                    Atrás
-                  </button>
-                  <button onClick={next} className="btn-primary">
-                    Ver vista previa
-                    <ArrowRight size={15} />
-                  </button>
+                <div className="flex gap-3 pt-4">
+                  <button onClick={back} className="btn-secondary">Atrás</button>
+                  <button onClick={next} className="btn-primary">Vista Previa</button>
                 </div>
               </div>
-
-              {/* Live preview */}
               <div className="hidden lg:block">
-                <p className="text-xs font-medium text-[var(--color-text-muted)] uppercase tracking-wider mb-4">Vista previa del pase</p>
                 <DigitalPassCard
                   businessName="Tu Negocio"
-                  programName={programName || 'Mi Programa'}
-                  customerName="Cliente Demo"
-                  funFact="Nivel: VIP Oro"
+                  programName={programName || 'Nueva Tarjeta'}
+                  customerName="Cliente Preview"
                   currentValue={Math.min(3, goalValue - 1)}
                   goalValue={goalValue}
-                  rewardDetail={rewardDetail || 'Recompensa'}
+                  rewardDetail={rewardDetail || 'Premio'}
                   programType={selectedTemplate?.programType || 'visits'}
                   bgColor={bgColor}
                   textColor={textColor}
@@ -258,46 +232,24 @@ export default function NewProgramPage() {
         )}
 
         {/* Step 3: Final preview */}
-        {currentStep === 2 && (
-          <motion.div
-            key="step-3"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div className="text-center max-w-md mx-auto">
-              <h2 className="text-lg font-semibold mb-2">¡Tu programa está listo!</h2>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-8">
-                Así se verá el pase digital de tus clientes.
-              </p>
-
-              <div className="max-w-sm mx-auto mb-8">
-                <DigitalPassCard
-                  businessName="Tu Negocio"
-                  programName={programName}
-                  customerName="Cliente Demo"
-                  funFact="Nivel: VIP Oro"
-                  currentValue={Math.min(3, goalValue - 1)}
-                  goalValue={goalValue}
-                  rewardDetail={rewardDetail}
-                  programType={selectedTemplate?.programType || 'visits'}
-                  bgColor={bgColor}
-                  textColor={textColor}
-                  animated={true}
-                />
-              </div>
-
-              <div className="flex gap-3 justify-center">
-                <button onClick={back} className="btn-secondary">
-                  <ArrowLeft size={15} />
-                  Editar
-                </button>
-                <button onClick={handleCreate} className="btn-primary !py-3 !px-6">
-                  <Check size={16} />
-                  Crear programa
-                </button>
-              </div>
+        {currentStep === 3 && (
+          <motion.div key="step-3" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="text-center max-w-sm mx-auto">
+            <h2 className="text-xl font-bold mb-6">¡Todo listo para lanzar!</h2>
+            <DigitalPassCard
+              businessName="Tu Negocio"
+              programName={programName}
+              customerName="Cliente Real"
+              currentValue={0}
+              goalValue={goalValue}
+              rewardDetail={rewardDetail}
+              programType={selectedTemplate?.programType || 'visits'}
+              bgColor={bgColor}
+              textColor={textColor}
+              animated={true}
+            />
+            <div className="flex gap-3 justify-center mt-8">
+              <button onClick={back} className="btn-secondary">Editar</button>
+              <button onClick={handleCreate} className="btn-primary">Crear Tarjeta</button>
             </div>
           </motion.div>
         )}

@@ -14,7 +14,8 @@ import { useAppStore } from '@/lib/store';
 import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
 
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+  const resolvedParams = use(params);
+  const id = resolvedParams.id;
   const router = useRouter();
   const { programs, memberships, business } = useAppStore();
   
@@ -45,7 +46,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
     }
   };
 
-  if (!initialProgram) return <div className="p-8 text-center">Programa no encontrado</div>;
+  if (!initialProgram) return <div className="p-8 text-center text-[var(--color-text-muted)]">Tarjeta no encontrada</div>;
 
   const currentProgram = isEditing ? programData : initialProgram;
   const businessName = business?.name || 'Tu Negocio';
@@ -55,7 +56,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
     <div className="p-6 sm:p-8 max-w-5xl mx-auto pb-24">
       <Link href="/app/programs" className="flex items-center gap-1.5 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] mb-6 transition-colors">
         <ArrowLeft size={14} />
-        Volver a programas
+        Volver a tarjetas
       </Link>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -74,7 +75,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
             {isEditing ? (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Nombre del Programa</label>
+                  <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Nombre de la Tarjeta</label>
                   <input type="text" className="input-field font-bold text-xl" value={programData.name} onChange={e => setProgramData({...programData, name: e.target.value})} />
                 </div>
                 <div>
@@ -129,7 +130,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Program config */}
           <div className="card-surface p-5">
-            <h3 className="text-sm font-semibold mb-4">Configuración del Programa</h3>
+            <h3 className="text-sm font-semibold mb-4">Configuración de Reglas</h3>
             
             {isEditing ? (
               <div className="space-y-5">

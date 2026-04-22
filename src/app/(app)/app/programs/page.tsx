@@ -7,20 +7,28 @@ import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
 
 export default function ProgramsPage() {
-  const { programs, memberships } = useAppStore();
+  const { programs, memberships, removeProgram } = useAppStore();
+
+  const handleDelete = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (confirm('¿Estás seguro de que deseas eliminar esta tarjeta? Esta acción no se puede deshacer.')) {
+      removeProgram(id);
+    }
+  };
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Programas</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Tarjetas Recompensa</h1>
           <p className="text-sm text-[var(--color-text-secondary)] mt-1">
-            Gestiona tus programas de lealtad activos.
+            Gestiona tus dinámicas de lealtad activas.
           </p>
         </div>
         <Link href="/app/programs/new" className="btn-primary">
           <Plus size={16} />
-          Crear programa
+          Crear Tarjeta
         </Link>
       </div>
 
@@ -44,7 +52,15 @@ export default function ProgramsPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
             >
-              <Link href={`/app/programs/${prog.id}`} className="card-interactive p-6 block h-full">
+              <Link href={`/app/programs/${prog.id}`} className="card-interactive p-6 block h-full group relative">
+                <button
+                  onClick={(e) => handleDelete(e, prog.id)}
+                  className="absolute top-4 right-4 p-2 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
+                  aria-label="Eliminar tarjeta"
+                >
+                  <X size={14} />
+                </button>
+
                 <div className="flex items-center justify-between mb-4">
                   <span className="badge badge-brand">{getProgramTypeLabel(prog.programType)}</span>
                   <span className="badge badge-success">Activo</span>

@@ -41,6 +41,7 @@ export interface Business {
   locale: string;
   subscriptionStatus: SubscriptionStatus;
   trialEndsAt?: string;
+  pricingPlan: 'basic' | 'pro' | 'enterprise';
   createdAt: string;
   updatedAt: string;
 }
@@ -53,6 +54,7 @@ export interface Location {
   city?: string;
   state?: string;
   phone?: string;
+  schedule?: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -76,6 +78,7 @@ export interface LoyaltyProgram {
   description?: string;
   slug: string;
   programType: ProgramType;
+  dynamicType: 'loyalty' | 'giveaway';
   status: ProgramStatus;
   goalValue: number;
   rewardType: string;

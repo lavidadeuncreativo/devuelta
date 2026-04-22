@@ -140,8 +140,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={Users} label="Clientes Totales" value={customers.length} color="var(--color-brand)" delay={0.1} />
           <StatCard icon={CreditCard} label="Pases Activos" value={memberships.length} color="#6366f1" delay={0.15} />
-          <StatCard icon={Eye} label="Visitas Totales" value={totalVisits} color="#f59e0b" delay={0.2} />
-          <StatCard icon={Gift} label="Canjes Reales" value={totalRewards} color="#ec4899" delay={0.25} />
+          <StatCard icon={Eye} label="Registro de Visitas" value={totalVisits} color="#f59e0b" delay={0.2} tip="Escaneos de QR y registros manuales" />
+          <StatCard icon={Gift} label="Canjes Reales" value={totalRewards} color="#ec4899" delay={0.25} tip="Recompensas entregadas a clientes" />
         </div>
       </div>
 
@@ -197,7 +197,7 @@ export default function DashboardPage() {
             </h3>
             <div className="space-y-2">
               {[
-                { icon: Plus, label: 'Crear programa', href: '/app/programs/new', color: 'var(--color-brand)' },
+                { icon: Plus, label: 'Crear Tarjeta', href: '/app/programs/new', color: 'var(--color-brand)' },
                 { icon: Star, label: 'Buscar cliente y Registrar', href: '/app/customers', color: '#f59e0b' },
                 { icon: Gift, label: 'Redimir recompensa', href: '/app/customers', color: '#ec4899' },
                 { icon: BarChart3, label: 'Ver analytics', href: '/app/analytics', color: '#8b5cf6' },
@@ -225,7 +225,7 @@ export default function DashboardPage() {
       <div className="grid lg:grid-cols-2 gap-6">
         <div>
           <h3 className="text-sm font-semibold flex items-center gap-2 mb-4">
-            <Star size={15} className="text-[var(--color-brand)]" /> Rendimiento por Programa
+            <Star size={15} className="text-[var(--color-brand)]" /> Rendimiento por Tarjeta
           </h3>
           <div className="space-y-3">
             {programs.map((prog, i) => {
@@ -272,9 +272,9 @@ export default function DashboardPage() {
 
 // ── Animated Stat Card ──
 
-function StatCard({ icon: Icon, label, value, color, delay }: {
+function StatCard({ icon: Icon, label, value, color, delay, tip }: {
   icon: React.ElementType; label: string; value: number;
-  color: string; delay: number;
+  color: string; delay: number; tip?: string;
 }) {
   const [display, setDisplay] = useState(0);
 
@@ -300,6 +300,7 @@ function StatCard({ icon: Icon, label, value, color, delay }: {
       <div>
         <p className="text-2xl font-bold tracking-tight">{display.toLocaleString()}</p>
         <p className="text-[11px] text-[var(--color-text-muted)] mt-0.5 uppercase tracking-wider">{label}</p>
+        {tip && <p className="text-[9px] text-[var(--color-text-muted)] mt-1 opacity-60 leading-none">{tip}</p>}
       </div>
     </motion.div>
   );

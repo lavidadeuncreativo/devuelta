@@ -7,6 +7,7 @@ import {
   IProgramRepository
 } from '../repositories/base';
 import { Membership, LoyaltyProgram, Visit, Reward, Redemption } from '../types';
+import { WhatsAppService } from './whatsapp-service';
 
 export class LoyaltyService {
   constructor(
@@ -32,7 +33,10 @@ export class LoyaltyService {
       const diffMinutes = (now - lastVisit) / (1000 * 60);
       if (diffMinutes < program.visitCooldownMinutes) {
         const remaining = Math.ceil(program.visitCooldownMinutes - diffMinutes);
-        return { success: false, message: `Debes esperar ${remaining} minutos para registrar otra visita.` };
+        return { 
+          success: false, 
+          message: `Límite de tiempo: Faltan ${remaining} min. para el siguiente registro.` 
+        };
       }
     }
 
@@ -79,6 +83,9 @@ export class LoyaltyService {
       entityId: membershipId,
       metadata: { locationId, rewardUnlocked }
     });
+
+    // Trigger WhatsApp Notification
+    WhatsAppService.sendVisitNotification(membershipId, 'visit_recorded').catch(console.error);
 
     return { 
       success: true, 
@@ -128,6 +135,16 @@ export class LoyaltyService {
       entityId: availableReward.id,
       metadata: { locationId, membershipId }
     });
+
+    // Trigger WhatsApp Notification
+    if (membership.id) {
+       WhatsAppService.sendVisitConfirmation(
+         '5551234567', // Mock phone
+         'Cliente', 
+         'Tarjeta', 
+         'Progress'
+       ).catch(console.error);
+    }
 
     return { success: true, message: '¡Recompensa canjeada con éxito!' };
   }
