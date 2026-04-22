@@ -11,6 +11,7 @@ import {
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { programTemplates } from '@/lib/demo/templates';
 import { cn, getBusinessTypeLabel } from '@/lib/utils';
+import { ProgramTemplate } from '@/lib/types';
 
 const businessTypes = [
   { type: 'cafeteria', icon: Coffee, color: '#f0e6d3', emoji: '☕' },
@@ -41,10 +42,10 @@ export default function OnboardingPage() {
   const [brandColor, setBrandColor] = useState('#0d9669');
   const [visitRegistered, setVisitRegistered] = useState(false);
 
-  const template = programTemplates.find(t => t.businessType === selectedType);
+  const template = programTemplates.find((t: ProgramTemplate) => t.businessType === selectedType);
 
-  const next = () => setStep(s => Math.min(s + 1, stepsConfig.length - 1));
-  const back = () => setStep(s => Math.max(s - 1, 0));
+  const next = () => setStep((s: number) => Math.min(s + 1, stepsConfig.length - 1));
+  const back = () => setStep((s: number) => Math.max(s - 1, 0));
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -66,7 +67,7 @@ export default function OnboardingPage() {
 
         {/* Progress bar */}
         <div className="flex items-center gap-1 mb-8 max-w-md mx-auto">
-          {stepsConfig.map((_, i) => (
+          {stepsConfig.map((_: { label: string; icon: any }, i: number) => (
             <div
               key={i}
               className={cn(
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
                 Te prepararemos un programa de lealtad listo para usar.
               </p>
               <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-                {businessTypes.map(biz => (
+                {businessTypes.map((biz: { type: string; icon: any; color: string; emoji: string }) => (
                   <button
                     key={biz.type}
                     onClick={() => { setSelectedType(biz.type); next(); }}
@@ -136,13 +137,13 @@ export default function OnboardingPage() {
               <div className="max-w-sm mx-auto space-y-4 mb-6">
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre de tu negocio</label>
-                  <input type="text" className="input-field" value={businessName} onChange={e => setBusinessName(e.target.value)} placeholder="Mi Negocio" />
+                  <input type="text" className="input-field" value={businessName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBusinessName(e.target.value)} placeholder="Mi Negocio" />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color principal</label>
                   <div className="flex items-center gap-2">
-                    <input type="color" value={brandColor} onChange={e => setBrandColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
-                    <input type="text" className="input-field flex-1" value={brandColor} onChange={e => setBrandColor(e.target.value)} />
+                    <input type="color" value={brandColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBrandColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)]" />
+                    <input type="text" className="input-field flex-1" value={brandColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBrandColor(e.target.value)} />
                   </div>
                 </div>
               </div>

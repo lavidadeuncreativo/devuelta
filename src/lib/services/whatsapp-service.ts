@@ -21,7 +21,7 @@ export class WhatsAppService {
     console.log('-------------------------');
 
     // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve: any) => setTimeout(resolve, 800));
 
     return {
       success: true,

@@ -52,7 +52,7 @@ function CustomersList() {
           className="input-field !pl-9 !py-2.5"
           placeholder="Buscar por nombre, email o teléfono..."
           value={query}
-          onChange={e => setQuery(e.target.value)}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
         />
       </div>
 

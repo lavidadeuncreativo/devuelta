@@ -22,8 +22,8 @@ import {
 
 export class DemoProgramRepository implements IProgramRepository {
   async getAll() { return useAppStore.getState().programs; }
-  async getById(id: string) { return useAppStore.getState().programs.find(p => p.id === id) || null; }
-  async getBySlug(slug: string) { return useAppStore.getState().programs.find(p => p.slug === slug) || null; }
+  async getById(id: string) { return useAppStore.getState().programs.find((p: LoyaltyProgram) => p.id === id) || null; }
+  async getBySlug(slug: string) { return useAppStore.getState().programs.find((p: LoyaltyProgram) => p.slug === slug) || null; }
   async create(data: Omit<LoyaltyProgram, 'id' | 'createdAt' | 'updatedAt'>) {
     const store = useAppStore.getState();
     store.addProgram(data);
@@ -39,9 +39,9 @@ export class DemoProgramRepository implements IProgramRepository {
 
 export class DemoCustomerRepository implements ICustomerRepository {
   async getAll() { return useAppStore.getState().customers; }
-  async getById(id: string) { return useAppStore.getState().customers.find(c => c.id === id) || null; }
+  async getById(id: string) { return useAppStore.getState().customers.find((c: Customer) => c.id === id) || null; }
   async getByContact(contact: string) { 
-    return useAppStore.getState().customers.find(c => c.email === contact || c.phone === contact) || null; 
+    return useAppStore.getState().customers.find((c: Customer) => c.email === contact || c.phone === contact) || null; 
   }
   async create(data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) {
     useAppStore.getState().addCustomer(data);
@@ -54,7 +54,7 @@ export class DemoCustomerRepository implements ICustomerRepository {
   }
   async search(query: string) {
     const q = query.toLowerCase();
-    return useAppStore.getState().customers.filter(c => 
+    return useAppStore.getState().customers.filter((c: Customer) => 
       c.fullName.toLowerCase().includes(q) || 
       c.email?.toLowerCase().includes(q) || 
       c.phone?.includes(q)
@@ -64,9 +64,9 @@ export class DemoCustomerRepository implements ICustomerRepository {
 
 export class DemoMembershipRepository implements IMembershipRepository {
   async getAll() { return useAppStore.getState().memberships; }
-  async getById(id: string) { return useAppStore.getState().memberships.find(m => m.id === id) || null; }
-  async getBySerial(serial: string) { return useAppStore.getState().memberships.find(m => m.passSerial === serial) || null; }
-  async getByCustomer(customerId: string) { return useAppStore.getState().memberships.filter(m => m.customerId === customerId); }
+  async getById(id: string) { return useAppStore.getState().memberships.find((m: Membership) => m.id === id) || null; }
+  async getBySerial(serial: string) { return useAppStore.getState().memberships.find((m: Membership) => m.passSerial === serial) || null; }
+  async getByCustomer(customerId: string) { return useAppStore.getState().memberships.filter((m: Membership) => m.customerId === customerId); }
   async create(data: Omit<Membership, 'id' | 'enrolledAt'>) {
     useAppStore.getState().addMembership(data);
     const memberships = useAppStore.getState().memberships;
@@ -79,7 +79,7 @@ export class DemoMembershipRepository implements IMembershipRepository {
 }
 
 export class DemoVisitRepository implements IVisitRepository {
-  async getByMembership(membershipId: string) { return useAppStore.getState().visits.filter(v => v.membershipId === membershipId); }
+  async getByMembership(membershipId: string) { return useAppStore.getState().visits.filter((v: Visit) => v.membershipId === membershipId); }
   async create(data: Omit<Visit, 'id' | 'createdAt'>) {
     useAppStore.getState().addVisitRecord(data);
     const visits = useAppStore.getState().visits;
@@ -88,7 +88,7 @@ export class DemoVisitRepository implements IVisitRepository {
 }
 
 export class DemoRewardRepository implements IRewardRepository {
-  async getByMembership(membershipId: string) { return useAppStore.getState().rewards.filter(r => r.membershipId === membershipId); }
+  async getByMembership(membershipId: string) { return useAppStore.getState().rewards.filter((r: Reward) => r.membershipId === membershipId); }
   async create(data: Omit<Reward, 'id' | 'unlockedAt'>) {
     useAppStore.getState().addRewardRecord(data);
     const rewards = useAppStore.getState().rewards;
@@ -96,13 +96,13 @@ export class DemoRewardRepository implements IRewardRepository {
   }
   async update(id: string, updates: Partial<Reward>) {
     useAppStore.getState().updateRewardRecord(id, updates);
-    const reward = useAppStore.getState().rewards.find(r => r.id === id);
+    const reward = useAppStore.getState().rewards.find((r: Reward) => r.id === id);
     return reward!;
   }
 }
 
 export class DemoRedemptionRepository implements IRedemptionRepository {
-  async getByMembership(membershipId: string) { return useAppStore.getState().redemptions.filter(r => r.membershipId === membershipId); }
+  async getByMembership(membershipId: string) { return useAppStore.getState().redemptions.filter((r: Redemption) => r.membershipId === membershipId); }
   async create(data: Omit<Redemption, 'id' | 'redeemedAt'>) {
     useAppStore.getState().addRedemptionRecord(data);
     const redemptions = useAppStore.getState().redemptions;
@@ -119,12 +119,12 @@ export class DemoLocationRepository implements ILocationRepository {
   }
   async update(id: string, updates: Partial<Location>) {
     /* Need updateLocation in store */
-    return useAppStore.getState().locations.find(l => l.id === id)!;
+    return useAppStore.getState().locations.find((l: Location) => l.id === id)!;
   }
 }
 
 export class DemoAuditRepository implements IAuditRepository {
-  async getLogs(businessId: string) { return useAppStore.getState().auditLogs.filter(l => l.businessId === businessId); }
+  async getLogs(businessId: string) { return useAppStore.getState().auditLogs.filter((l: AuditLog) => l.businessId === businessId); }
   async log(data: Omit<AuditLog, 'id' | 'createdAt'>) {
     useAppStore.getState().addAuditLog(data);
     const logs = useAppStore.getState().auditLogs;

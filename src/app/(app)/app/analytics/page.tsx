@@ -169,7 +169,7 @@ export default function AnalyticsPage() {
           <div className="relative">
             <select 
               value={timeframe}
-              onChange={(e) => setTimeframe(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setTimeframe(e.target.value)}
               className="input-field !py-2 !pl-9 !pr-8 text-sm appearance-none bg-[var(--color-bg-secondary)] border-none cursor-pointer"
             >
               <option value="7d">Últimos 7 días</option>

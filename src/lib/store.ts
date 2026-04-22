@@ -63,7 +63,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set) => ({
+    (set: any) => ({
       business: demoBusiness,
       programs: demoPrograms,
       customers: demoCustomers,
@@ -85,7 +85,7 @@ export const useAppStore = create<AppState>()(
         programs: state.programs.map((p: LoyaltyProgram) => (p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p))
       })),
 
-      addProgram: (data) => set((state) => ({
+      addProgram: (data: Omit<LoyaltyProgram, 'id' | 'createdAt' | 'updatedAt'>) => set((state: AppState) => ({
         programs: [...state.programs, {
           ...data,
           id: `prg_${Date.now()}`,
@@ -98,7 +98,7 @@ export const useAppStore = create<AppState>()(
         programs: state.programs.filter((p: LoyaltyProgram) => p.id !== id)
       })),
 
-      addCustomer: (data) => set((state) => ({
+      addCustomer: (data: Omit<Customer, 'id' | 'createdAt' | 'updatedAt'>) => set((state: AppState) => ({
         customers: [...state.customers, {
           ...data,
           id: `cus_${Date.now()}`,
@@ -107,7 +107,7 @@ export const useAppStore = create<AppState>()(
         }]
       })),
 
-      addMembership: (data) => set((state) => ({
+      addMembership: (data: Omit<Membership, 'id' | 'enrolledAt'>) => set((state: AppState) => ({
         memberships: [...state.memberships, {
           ...data,
           id: `mem_${Date.now()}`,
@@ -119,11 +119,11 @@ export const useAppStore = create<AppState>()(
         memberships: state.memberships.map((m: Membership) => (m.id === id ? { ...m, ...updates } : m))
       })),
 
-      addVisitRecord: (data) => set((state) => ({
+      addVisitRecord: (data: Omit<Visit, 'id' | 'createdAt'>) => set((state: AppState) => ({
         visits: [...state.visits, { ...data, id: `vst_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
 
-      addRewardRecord: (data) => set((state) => ({
+      addRewardRecord: (data: Omit<Reward, 'id' | 'unlockedAt'>) => set((state: AppState) => ({
         rewards: [...state.rewards, { ...data, id: `rwd_${Date.now()}`, unlockedAt: new Date().toISOString() }]
       })),
 
@@ -131,11 +131,11 @@ export const useAppStore = create<AppState>()(
         rewards: state.rewards.map((r: Reward) => (r.id === id ? { ...r, ...updates } : r))
       })),
 
-      addRedemptionRecord: (data) => set((state) => ({
+      addRedemptionRecord: (data: Omit<Redemption, 'id' | 'redeemedAt'>) => set((state: AppState) => ({
         redemptions: [...state.redemptions, { ...data, id: `rdm_${Date.now()}`, redeemedAt: new Date().toISOString() }]
       })),
 
-      addLocation: (data) => set((state) => ({
+      addLocation: (data: Omit<BranchLocation, 'id' | 'createdAt'>) => set((state: AppState) => ({
         locations: [...state.locations, {
           ...data,
           id: `loc_${Date.now()}`,
@@ -151,13 +151,13 @@ export const useAppStore = create<AppState>()(
         locations: state.locations.filter((l: BranchLocation) => l.id !== id)
       })),
 
-      addAuditLog: (data) => set((state) => ({
+      addAuditLog: (data: Omit<AuditLog, 'id' | 'createdAt'>) => set((state: AppState) => ({
         auditLogs: [...state.auditLogs, { ...data, id: `log_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
       
-      setUsers: (users) => set({ users }),
+      setUsers: (users: User[]) => set({ users }),
       
-      addUser: (data) => set((state) => ({
+      addUser: (data: Omit<User, 'id' | 'createdAt'>) => set((state: AppState) => ({
         users: [...state.users, { ...data, id: `usr_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
 

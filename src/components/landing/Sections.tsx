@@ -83,7 +83,7 @@ export function ProblemSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-6">
-          {problems.map((item, i) => (
+          {problems.map((item: { icon: any; text: string }, i: number) => (
             <motion.div
               key={i}
               className="card-surface p-6 flex flex-col items-start gap-4"
@@ -143,7 +143,7 @@ export function HowItWorksSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step, i) => (
+          {steps.map((step: { number: string; icon: any; title: string; description: string }, i: number) => (
             <motion.div
               key={i}
               className="relative"
@@ -201,7 +201,7 @@ export function UseCasesSection() {
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {cases.map((item, i) => (
+          {cases.map((item: { icon: any; label: string; example: string; color: string }, i: number) => (
             <motion.div
               key={i}
               className="card-interactive p-5 text-center group"
@@ -252,7 +252,7 @@ export function PassDemoSection() {
                 'Personalizable con tu marca y colores',
                 'Notificaciones push cuando hay recompensa',
                 'QR único por cada cliente',
-              ].map((item, i) => (
+              ].map((item: string, i: number) => (
                 <motion.div
                   key={i}
                   className="flex items-center gap-3"
@@ -321,7 +321,7 @@ export function BenefitsSection() {
         />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {benefits.map((item, i) => (
+          {benefits.map((item: { icon: any; title: string; description: string; color: string }, i: number) => (
             <motion.div
               key={i}
               className="card-surface p-6"
@@ -383,7 +383,7 @@ export function TestimonialSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-6">
-          {testimonials.map((t, i) => (
+          {testimonials.map((t: { quote: string; name: string; role: string; initials: string }, i: number) => (
             <motion.div
               key={i}
               className="card-surface p-6 flex flex-col"
@@ -393,7 +393,7 @@ export function TestimonialSection() {
             >
               {/* Stars */}
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, j) => (
+                {[...Array(5)].map((_: any, j: number) => (
                   <Star key={j} size={14} className="text-amber-400 fill-amber-400" />
                 ))}
               </div>
@@ -457,7 +457,7 @@ export function PricingSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-6">
-          {tiers.map((tier, i) => (
+          {tiers.map((tier: { name: string; price: string; desc: string; features: string[]; highlight: boolean }, i: number) => (
             <motion.div
               key={i}
               className={cn(
@@ -483,7 +483,7 @@ export function PricingSection() {
               </div>
 
               <div className="space-y-3 mb-8 flex-1">
-                {tier.features.map((f, j) => (
+                {tier.features.map((f: string, j: number) => (
                   <div key={j} className="flex items-center gap-3">
                     <Check size={14} className="text-[var(--color-brand)] shrink-0" />
                     <span className="text-sm text-[var(--color-text-secondary)]">{f}</span>
@@ -550,7 +550,7 @@ export function FAQSection() {
         />
 
         <div className="space-y-3">
-          {faqs.map((faq, i) => (
+          {faqs.map((faq: { q: string; a: string }, i: number) => (
             <FAQItem key={i} question={faq.q} answer={faq.a} index={i} isInView={isInView} />
           ))}
         </div>
@@ -662,7 +662,7 @@ export function Footer() {
           </div>
 
           <div className="flex items-center gap-6">
-            {['Privacidad', 'Términos', 'Contacto'].map(link => (
+            {['Privacidad', 'Términos', 'Contacto'].map((link: string) => (
               <a key={link} href="#" className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors">
                 {link}
               </a>

@@ -53,7 +53,7 @@ export default function BrandSettingsPage() {
             <h3 className="text-sm font-semibold">Identidad del negocio</h3>
             <div>
               <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre del negocio</label>
-              <input type="text" className="input-field" value={name} onChange={e => setName(e.target.value)} />
+              <input type="text" className="input-field" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} />
             </div>
             
             <div className="grid grid-cols-2 gap-4">
@@ -71,7 +71,7 @@ export default function BrandSettingsPage() {
                   <label className="border border-dashed border-[var(--color-border)] rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-brand)] hover:bg-[var(--color-brand)]/5 transition-colors">
                     <Upload size={18} className="text-[var(--color-text-muted)] mb-2" />
                     <span className="text-xs text-[var(--color-text-secondary)]">Subir logo</span>
-                    <input type="file" accept="image/png, image/jpeg, image/svg+xml" className="hidden" onChange={(e) => handleImageUpload(e, setLogoUrl)} />
+                    <input type="file" accept="image/png, image/jpeg, image/svg+xml" className="hidden" onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e, setLogoUrl)} />
                   </label>
                 )}
               </div>
@@ -90,7 +90,7 @@ export default function BrandSettingsPage() {
                   <label className="border border-dashed border-[var(--color-border)] rounded-xl aspect-square flex flex-col items-center justify-center cursor-pointer hover:border-[var(--color-brand)] hover:bg-[var(--color-brand)]/5 transition-colors">
                     <Upload size={18} className="text-[var(--color-text-muted)] mb-2" />
                     <span className="text-xs text-[var(--color-text-secondary)]">Subir ícono</span>
-                    <input type="file" accept="image/png, image/svg+xml" className="hidden" onChange={(e) => handleImageUpload(e, setStampIconUrl)} />
+                    <input type="file" accept="image/png, image/svg+xml" className="hidden" onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleImageUpload(e, setStampIconUrl)} />
                   </label>
                 )}
               </div>
@@ -104,15 +104,15 @@ export default function BrandSettingsPage() {
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color principal (Fondo)</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
-                  <input type="text" className="input-field flex-1 text-sm" value={primaryColor} onChange={e => setPrimaryColor(e.target.value)} />
+                  <input type="color" value={primaryColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrimaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
+                  <input type="text" className="input-field flex-1 text-sm" value={primaryColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPrimaryColor(e.target.value)} />
                 </div>
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Color secundario (Texto)</label>
                 <div className="flex items-center gap-2">
-                  <input type="color" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
-                  <input type="text" className="input-field flex-1 text-sm" value={secondaryColor} onChange={e => setSecondaryColor(e.target.value)} />
+                  <input type="color" value={secondaryColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSecondaryColor(e.target.value)} className="w-10 h-10 rounded-lg cursor-pointer border border-[var(--color-border)] shrink-0" />
+                  <input type="text" className="input-field flex-1 text-sm" value={secondaryColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSecondaryColor(e.target.value)} />
                 </div>
               </div>
             </div>

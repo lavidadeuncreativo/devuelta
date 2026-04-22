@@ -55,7 +55,7 @@ export default function ProgramsPage() {
             >
               <Link href={`/app/programs/${prog.id}`} className="card-interactive p-6 block h-full group relative">
                 <button
-                  onClick={(e) => handleDelete(e, prog.id)}
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleDelete(e, prog.id)}
                   className="absolute top-4 right-4 p-2 rounded-lg bg-red-500/10 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500/20"
                   aria-label="Eliminar tarjeta"
                 >

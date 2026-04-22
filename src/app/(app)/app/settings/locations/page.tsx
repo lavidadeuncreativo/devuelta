@@ -3,9 +3,9 @@
 import { motion } from 'framer-motion';
 import { ArrowLeft, MapPin, Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
-import { useAppStore } from '@/lib/store';
 import { AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
+import { BranchLocation } from '@/lib/types';
 
 export default function LocationsSettingsPage() {
   const { locations, addLocation, updateLocation, removeLocation } = useAppStore();
@@ -19,7 +19,7 @@ export default function LocationsSettingsPage() {
     schedule: '',
   });
 
-  const handleOpenModal = (loc?: any) => {
+  const handleOpenModal = (loc?: BranchLocation) => {
     if (loc) {
       setEditingId(loc.id);
       setFormData({
@@ -79,7 +79,7 @@ export default function LocationsSettingsPage() {
       </div>
 
       <div className="space-y-4">
-        {locations.map((loc, i) => (
+        {locations.map((loc: BranchLocation, i: number) => (
           <motion.div key={loc.id} className="card-surface p-5 flex items-center gap-4 group" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <div className="w-11 h-11 rounded-xl bg-amber-500/15 flex items-center justify-center shrink-0">
               <MapPin size={18} className="text-amber-400" />
@@ -122,15 +122,15 @@ export default function LocationsSettingsPage() {
               <form onSubmit={handleSave} className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Nombre</label>
-                  <input type="text" className="input-field" placeholder="Ej. Sucursal Reforma" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
+                  <input type="text" className="input-field" placeholder="Ej. Sucursal Reforma" value={formData.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, name: e.target.value})} required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Dirección</label>
-                  <input type="text" className="input-field" placeholder="Ej. Av. Reforma 222" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} required />
+                  <input type="text" className="input-field" placeholder="Ej. Av. Reforma 222" value={formData.address} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({...formData, address: e.target.value})} required />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Horarios</label>
-                  <textarea className="input-field !min-h-[80px] resize-none" placeholder="L-V 9:00 - 18:00..." value={formData.schedule} onChange={e => setFormData({...formData, schedule: e.target.value})} />
+                  <textarea className="input-field !min-h-[80px] resize-none" placeholder="L-V 9:00 - 18:00..." value={formData.schedule} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({...formData, schedule: e.target.value})} />
                 </div>
                 <div className="flex gap-3 pt-4">
                   <button type="button" onClick={() => setShowModal(false)} className="btn-secondary flex-1">Cancelar</button>

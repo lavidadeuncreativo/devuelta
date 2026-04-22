@@ -50,8 +50,8 @@ export default function NewProgramPage() {
     setCurrentStep(2);
   };
 
-  const next = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1));
-  const back = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+  const next = () => setCurrentStep((prev: number) => Math.min(prev + 1, steps.length - 1));
+  const back = () => setCurrentStep((prev: number) => Math.max(prev - 1, 0));
 
   const handleCreate = async () => {
     const businessId = useAppStore.getState().business?.id || 'biz_01';
@@ -100,7 +100,7 @@ export default function NewProgramPage() {
 
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-8">
-        {steps.map((step, i) => (
+        {steps.map((step: { id: string; label: string; icon: any }, i: number) => (
           <div key={step.id} className="flex items-center gap-2">
             <button
               onClick={() => i <= currentStep && setCurrentStep(i)}
@@ -162,7 +162,7 @@ export default function NewProgramPage() {
           <motion.div key="step-1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
             <h2 className="text-lg font-semibold mb-2">Selecciona una plantilla</h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              {programTemplates.map((template) => (
+              {programTemplates.map((template: ProgramTemplate) => (
                 <button key={template.name} onClick={() => handleSelectTemplate(template)} className="card-interactive p-5 text-left group">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-xl bg-[var(--color-brand-subtle)] flex items-center justify-center shrink-0">
@@ -188,24 +188,24 @@ export default function NewProgramPage() {
                 <h2 className="text-lg font-semibold">Personaliza los detalles</h2>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre de la {dynamicType === 'loyalty' ? 'Tarjeta' : 'Dinámica'}</label>
-                  <input type="text" className="input-field" value={programName} onChange={e => setProgramName(e.target.value)} />
+                  <input type="text" className="input-field" value={programName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramName(e.target.value)} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Meta ({selectedTemplate?.programType === 'visits' ? 'visitas' : 'puntos'})</label>
-                  <input type="number" className="input-field" value={goalValue} onChange={e => setGoalValue(parseInt(e.target.value) || 1)} min={1} />
+                  <input type="number" className="input-field" value={goalValue} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGoalValue(parseInt(e.target.value) || 1)} min={1} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Recompensa / Premio</label>
-                  <input type="text" className="input-field" value={rewardDetail} onChange={e => setRewardDetail(e.target.value)} />
+                  <input type="text" className="input-field" value={rewardDetail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRewardDetail(e.target.value)} />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Fondo</label>
-                    <input type="color" value={bgColor} onChange={e => setBgColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
+                    <input type="color" value={bgColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setBgColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Texto</label>
-                    <input type="color" value={textColor} onChange={e => setTextColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
+                    <input type="color" value={textColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTextColor(e.target.value)} className="w-full h-10 rounded-lg cursor-pointer" />
                   </div>
                 </div>
                 <div className="flex gap-3 pt-4">

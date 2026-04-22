@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ArrowLeft, UserPlus, MoreHorizontal, Shield } from 'lucide-react';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
+import { User } from '@/lib/types';
 
 export default function TeamSettingsPage() {
   const { users } = useAppStore();
@@ -20,7 +21,7 @@ export default function TeamSettingsPage() {
         <button className="btn-primary"><UserPlus size={16} /> Invitar miembro</button>
       </div>
       <div className="space-y-3">
-        {users.map((user, i) => (
+        {users.map((user: User, i: number) => (
           <motion.div key={user.id} className="card-surface p-5 flex items-center gap-4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-sm font-bold text-white/90">
               {user.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}

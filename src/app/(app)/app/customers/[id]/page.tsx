@@ -11,7 +11,7 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useState, useEffect } from 'react';
 import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
 import { LoyaltyService } from '@/lib/services/loyalty-service';
-import { MembershipWithDetails, Membership, LoyaltyProgram, Customer } from '@/lib/types';
+import { MembershipWithDetails, Membership, LoyaltyProgram, Customer, Reward, AuditLog } from '@/lib/types';
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -30,7 +30,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         ...m,
         customer,
         program: programs.find((p: LoyaltyProgram) => p.id === m.programId)!,
-        rewards: useAppStore.getState().rewards.filter((r: any) => r.membershipId === m.id)
+        rewards: useAppStore.getState().rewards.filter((r: Reward) => r.membershipId === m.id)
       })).filter((m: any) => m.program);
       setCustomerMemberships(enriched);
     }
@@ -169,11 +169,11 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <div>
             <h2 className="text-sm font-semibold mb-4">Actividad reciente</h2>
             <div className="space-y-1">
-              {auditLogs.filter((l: any) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id)).length > 0
+              {auditLogs.filter((l: AuditLog) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id)).length > 0
                 ? auditLogs
-                    .filter((l: any) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id))
-                    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .map((log: any) => (
+                    .filter((l: AuditLog) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id))
+                    .sort((a: AuditLog, b: AuditLog) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((log: AuditLog) => (
                   <div key={log.id} className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center mt-0.5 ${
                       log.action === 'RECORD_VISIT' ? 'bg-amber-500/15' :
@@ -214,7 +214,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 programType={selectedMembership.program.programType}
                 bgColor={selectedMembership.program.passBgColor}
                 textColor={selectedMembership.program.passTextColor}
-                rewardAvailable={selectedMembership.rewards.some((r: any) => r.status === 'available')}
+                rewardAvailable={selectedMembership.rewards.some((r: Reward) => r.status === 'available')}
                 animated={true}
               />
             )}
@@ -233,10 +233,10 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </button>
                 <button 
                   onClick={() => handleAction('redeem')}
-                  disabled={isProcessing || !selectedMembership.rewards.some((r: any) => r.status === 'available')}
+                  disabled={isProcessing || !selectedMembership.rewards.some((r: Reward) => r.status === 'available')}
                   className={cn(
                     "btn-secondary w-full justify-center text-sm disabled:opacity-50",
-                    selectedMembership.rewards.some((r: any) => r.status === 'available') ? "animate-pulse" : ""
+                    selectedMembership.rewards.some((r: Reward) => r.status === 'available') ? "animate-pulse" : ""
                   )}
                 >
                   <Gift size={14} />

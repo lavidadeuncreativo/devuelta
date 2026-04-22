@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, Star, Users, Zap, BarChart3,
   Settings, ChevronLeft, ChevronRight, LogOut,
-  QrCode, Bell, Search, Menu, X, Megaphone,
+  QrCode, Bell, Search, Menu, X, Megaphone, LucideIcon,
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -80,7 +80,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
         {/* Navigation */}
         <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          {navItems.map(item => {
+          {navItems.map((item: { href: string; icon: LucideIcon; label: string }) => {
             const isActive = pathname.startsWith(item.href);
             return (
               <Link
@@ -167,7 +167,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 placeholder="Buscar clientes, programas..."
                 className="input-field !pl-9 !py-2 text-sm !bg-[var(--color-bg-primary)]"
                 value={globalSearch}
-                onChange={e => setGlobalSearch(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setGlobalSearch(e.target.value)}
                 onKeyDown={handleSearchKeys}
               />
             </div>
@@ -236,7 +236,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
               {/* Mobile nav */}
               <nav className="flex-1 py-4 px-3 space-y-1">
-                {navItems.map(item => {
+                {navItems.map((item: { href: string; icon: LucideIcon; label: string }) => {
                   const isActive = pathname.startsWith(item.href);
                   return (
                     <Link

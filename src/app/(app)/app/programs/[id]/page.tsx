@@ -18,7 +18,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
   const router = useRouter();
   const { programs, memberships, business } = useAppStore();
   
-  const initialProgram = programs.find((p) => p.id === id) || programs[0];
+  const initialProgram = programs.find((p: LoyaltyProgram) => p.id === id) || programs[0];
   
   // State for live editing
   const [isEditing, setIsEditing] = useState(false);
@@ -84,11 +84,11 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
               <div className="space-y-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Nombre de la Tarjeta</label>
-                  <input type="text" className="input-field font-bold text-xl" value={programData.name} onChange={e => setProgramData({...programData, name: e.target.value})} />
+                  <input type="text" className="input-field font-bold text-xl" value={programData.name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, name: e.target.value})} />
                 </div>
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Recompensa</label>
-                  <input type="text" className="input-field" value={programData.rewardDetail} onChange={e => setProgramData({...programData, rewardDetail: e.target.value})} />
+                  <input type="text" className="input-field" value={programData.rewardDetail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, rewardDetail: e.target.value})} />
                 </div>
               </div>
             ) : (
@@ -145,11 +145,11 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Meta ({programData.programType === 'visits' ? 'Visitas' : 'Puntos'})</label>
-                    <input type="number" min={1} className="input-field" value={programData.goalValue} onChange={e => setProgramData({...programData, goalValue: Number(e.target.value)})} />
+                    <input type="number" min={1} className="input-field" value={programData.goalValue} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, goalValue: Number(e.target.value)})} />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Cooldown (Minutos)</label>
-                    <input type="number" min={0} className="input-field" value={programData.visitCooldownMinutes} onChange={e => setProgramData({...programData, visitCooldownMinutes: Number(e.target.value)})} />
+                    <input type="number" min={0} className="input-field" value={programData.visitCooldownMinutes} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, visitCooldownMinutes: Number(e.target.value)})} />
                   </div>
                 </div>
                 
@@ -157,15 +157,15 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Color Principal del Pase</label>
                     <div className="flex items-center gap-2">
-                      <input type="color" value={programData.passBgColor} onChange={e => setProgramData({...programData, passBgColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
-                      <input type="text" className="input-field text-sm py-1.5" value={programData.passBgColor} onChange={e => setProgramData({...programData, passBgColor: e.target.value})} />
+                      <input type="color" value={programData.passBgColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, passBgColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
+                      <input type="text" className="input-field text-sm py-1.5" value={programData.passBgColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, passBgColor: e.target.value})} />
                     </div>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1">Color de Texto del Pase</label>
                     <div className="flex items-center gap-2">
-                      <input type="color" value={programData.passTextColor} onChange={e => setProgramData({...programData, passTextColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
-                      <input type="text" className="input-field text-sm py-1.5" value={programData.passTextColor} onChange={e => setProgramData({...programData, passTextColor: e.target.value})} />
+                      <input type="color" value={programData.passTextColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, passTextColor: e.target.value})} className="w-8 h-8 rounded shrink-0 cursor-pointer border border-[var(--color-border)]" />
+                      <input type="text" className="input-field text-sm py-1.5" value={programData.passTextColor} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setProgramData({...programData, passTextColor: e.target.value})} />
                     </div>
                   </div>
                 </div>

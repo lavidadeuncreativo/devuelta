@@ -56,7 +56,7 @@ export function Navbar() {
 
             {/* Desktop nav */}
             <div className="hidden md:flex items-center gap-1">
-              {navLinks.map(link => (
+              {navLinks.map((link: { href: string; label: string }) => (
                 <a
                   key={link.href}
                   href={link.href}
@@ -114,7 +114,7 @@ export function Navbar() {
               transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="flex flex-col gap-1 mb-4">
-                {navLinks.map(link => (
+                {navLinks.map((link: { href: string; label: string }) => (
                   <a
                     key={link.href}
                     href={link.href}

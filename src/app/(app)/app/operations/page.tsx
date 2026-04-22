@@ -19,7 +19,7 @@ import {
 import { useAppStore } from '@/lib/store';
 import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
 import { LoyaltyService } from '@/lib/services/loyalty-service';
-import { MembershipWithDetails, Customer } from '@/lib/types';
+import { MembershipWithDetails, Customer, Membership, Reward } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 
@@ -71,7 +71,7 @@ export default function OperationsPage() {
     
     // Load memberships
     const memberships = await membershipRepo.getByCustomer(customer.id);
-    const enriched = await Promise.all(memberships.map(async m => {
+    const enriched = await Promise.all(memberships.map(async (m: Membership) => {
       const program = await programRepo.getById(m.programId);
       const rewards = await rewardRepo.getByMembership(m.id);
       return { ...m, customer, program: program!, rewards };
@@ -152,7 +152,7 @@ export default function OperationsPage() {
               className="input-field pl-10 h-12 text-base"
               placeholder="Nombre, teléfono o email..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
             />
             
             {/* Search Results Dropdown */}
@@ -164,7 +164,7 @@ export default function OperationsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                 >
-                  {searchResults.map((customer) => (
+                  {searchResults.map((customer: Customer) => (
                     <button
                       key={customer.id}
                       className="w-full p-4 flex items-center gap-3 hover:bg-[var(--color-bg-tertiary)] transition-colors text-left border-b border-[var(--color-border-subtle)] last:border-0"
@@ -237,7 +237,7 @@ export default function OperationsPage() {
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="text-[var(--color-text-secondary)]">Progreso: {m.currentVisits}/{m.program.goalValue}</span>
-                        {m.rewards.some((r: any) => r.status === 'available') && (
+                        {m.rewards.some((r: Reward) => r.status === 'available') && (
                           <span className="flex items-center gap-1 text-emerald-400 font-bold animate-pulse">
                             <Gift size={12} /> ¡Canje listo!
                           </span>
@@ -282,7 +282,7 @@ export default function OperationsPage() {
                   bgColor={selectedMembership.program.passBgColor}
                   textColor={selectedMembership.program.passTextColor}
                   animated={true}
-                  rewardAvailable={selectedMembership.rewards.some(r => r.status === 'available')}
+                rewardAvailable={selectedMembership.rewards.some((r: Reward) => r.status === 'available')}
                 />
 
                 <div className="card-surface p-5">
@@ -349,23 +349,23 @@ export default function OperationsPage() {
                     <button
                       className={cn(
                         "group relative h-24 overflow-hidden transition-all flex items-center justify-center gap-4 active:scale-95 disabled:opacity-50 disabled:grayscale",
-                        selectedMembership.rewards.some(r => r.status === 'available')
+                        selectedMembership.rewards.some((r: Reward) => r.status === 'available')
                           ? "bg-pink-500 text-white border-transparent shadow-lg shadow-pink-500/20"
                           : "bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] text-[var(--color-text-muted)] cursor-not-allowed"
                       )}
                       onClick={handleRedeem}
-                      disabled={isProcessing || !selectedMembership.rewards.some(r => r.status === 'available')}
+                      disabled={isProcessing || !selectedMembership.rewards.some((r: Reward) => r.status === 'available')}
                     >
                       <div className={cn(
                         "w-12 h-12 rounded-xl flex items-center justify-center",
-                        selectedMembership.rewards.some(r => r.status === 'available') ? "bg-white/20" : "bg-[var(--color-bg-primary)]"
+                        selectedMembership.rewards.some((r: Reward) => r.status === 'available') ? "bg-white/20" : "bg-[var(--color-bg-primary)]"
                       )}>
                         {isProcessing ? <Loader2 size={24} className="animate-spin" /> : <Gift size={24} />}
                       </div>
                       <div className="text-left">
                         <p className="text-lg font-bold">Canjear Premio</p>
                         <p className="text-xs opacity-80">
-                          {selectedMembership.rewards.some(r => r.status === 'available') ? '¡Listo para entregar!' : 'Aún no disponible'}
+                          {selectedMembership.rewards.some((r: Reward) => r.status === 'available') ? '¡Listo para entregar!' : 'Aún no disponible'}
                         </p>
                       </div>
                     </button>

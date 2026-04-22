@@ -113,7 +113,7 @@ export function HeroSection() {
             >
               {/* Avatars stack */}
               <div className="flex -space-x-2">
-                {['S', 'M', 'A', 'R'].map((letter, i) => (
+                {['S', 'M', 'A', 'R'].map((letter: string, i: number) => (
                   <div
                     key={i}
                     className="w-8 h-8 rounded-full border-2 border-[var(--color-bg-primary)] flex items-center justify-center text-xs font-bold"
@@ -244,7 +244,7 @@ function HeroPassShowcase() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % passes.length);
+      setCurrent((prev: number) => (prev + 1) % passes.length);
     }, 4000);
     return () => clearInterval(timer);
   }, [passes.length]);
@@ -268,7 +268,7 @@ function HeroPassShowcase() {
 
       {/* Indicators */}
       <div className="flex items-center justify-center gap-2 mt-5">
-        {passes.map((_, i) => (
+        {passes.map((_: { businessName: string }, i: number) => (
           <button
             key={i}
             onClick={() => setCurrent(i)}

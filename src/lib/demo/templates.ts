@@ -112,5 +112,5 @@ export const programTemplates: ProgramTemplate[] = [
 ];
 
 export function getTemplateForBusinessType(type: string): ProgramTemplate | undefined {
-  return programTemplates.find(t => t.businessType === type);
+  return programTemplates.find((t: ProgramTemplate) => t.businessType === type);
 }

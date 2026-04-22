@@ -96,7 +96,7 @@ export class LoyaltyService {
 
   async redeemReward(membershipId: string, locationId: string, staffId: string, notes?: string): Promise<{ success: boolean; message: string }> {
     const rewards = await this.rewards.getByMembership(membershipId);
-    const availableReward = rewards.find(r => r.status === 'available');
+    const availableReward = rewards.find((r: Reward) => r.status === 'available');
 
     if (!availableReward) {
       return { success: false, message: 'No hay recompensas disponibles para canjear.' };
@@ -158,8 +158,8 @@ export class LoyaltyService {
       return { success: false, message: 'La tarjeta no es de tipo sorteo.' };
     }
 
-    const memberships = await this.memberships.getByProgramId(programId);
-    const activeParticipants = memberships.filter(m => m.currentVisits > 0);
+    const memberships = await (this.memberships as any).getByProgramId(programId); // Cast for demo repo specific method
+    const activeParticipants = memberships.filter((m: Membership) => m.currentVisits > 0);
 
     if (activeParticipants.length === 0) {
       return { success: false, message: 'No hay participantes con boletos acumulados.' };
@@ -168,7 +168,7 @@ export class LoyaltyService {
     // 1. Create a weighted pool
     // Each currentVisit counts as 1 ticket
     const pool: string[] = [];
-    activeParticipants.forEach(member => {
+    activeParticipants.forEach((member: Membership) => {
       for (let i = 0; i < member.currentVisits; i++) {
         pool.push(member.id);
       }
@@ -176,11 +176,11 @@ export class LoyaltyService {
 
     // 2. Pick a random winner ID from the pool
     const winnerMembershipId = pool[Math.floor(Math.random() * pool.length)];
-    const winnerMembership = activeParticipants.find(m => m.id === winnerMembershipId)!;
+    const winnerMembership = activeParticipants.find((m: Membership) => m.id === winnerMembershipId)!;
 
     // 3. Get winner details
     // In demo, we might need to fetch the customer
-    const customer = await useAppStore.getState().customers.find(c => c.id === winnerMembership.customerId);
+    const customer = await (useAppStore.getState().customers as Customer[]).find((c: Customer) => c.id === winnerMembership.customerId);
     
     // 4. Notify winner (WhatsApp Mock)
     if (customer?.phone) {
@@ -189,7 +189,7 @@ export class LoyaltyService {
         customer.fullName,
         program.rewardDetail,
         program.name
-      ).catch(err => console.error('Error sending WA winner notification:', err));
+      ).catch((err: any) => console.error('Error sending WA winner notification:', err));
     }
 
     return { 

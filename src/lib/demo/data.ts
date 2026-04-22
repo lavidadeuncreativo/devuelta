@@ -184,7 +184,7 @@ const customerNames = [
   'Daniela Vega', 'Gabriel Navarro',
 ];
 
-export const demoCustomers: Customer[] = customerNames.map((name, i) => ({
+export const demoCustomers: Customer[] = customerNames.map((name: string, i: number) => ({
   id: `cust_${String(i + 1).padStart(2, '0')}`,
   businessId: 'biz_01',
   fullName: name,
@@ -227,21 +227,21 @@ function makeMembership(
 
 export const demoMemberships: Membership[] = [
   // Program 1: Café de Vuelta (5 visits goal) — most popular
-  ...Array.from({ length: 20 }, (_, i) => {
+  ...Array.from({ length: 20 }, (_: any, i: number) => {
     const visits = [4, 3, 5, 2, 1, 4, 3, 5, 2, 3, 4, 1, 5, 2, 3, 4, 5, 1, 2, 3][i];
     const earned = [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0][i];
     const redeemed = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0][i];
     return makeMembership(i, 0, visits % 5, 0, earned, redeemed);
   }),
   // Program 2: Corte Frecuente (4 visits goal)
-  ...Array.from({ length: 12 }, (_, i) => {
+  ...Array.from({ length: 12 }, (_: any, i: number) => {
     const visits = [3, 2, 4, 1, 3, 2, 4, 1, 3, 2, 1, 4][i];
     const earned = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1][i];
     const redeemed = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0][i];
     return makeMembership(i + 5, 1, visits % 4, 0, earned, redeemed);
   }),
   // Program 3: Puntos Premium (50 points goal)
-  ...Array.from({ length: 10 }, (_, i) => {
+  ...Array.from({ length: 10 }, (_: any, i: number) => {
     const points = [45, 30, 50, 12, 38, 22, 50, 8, 41, 15][i];
     const earned = points >= 50 ? 1 : 0;
     const redeemed = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0][i];
@@ -252,8 +252,8 @@ export const demoMemberships: Membership[] = [
 // ── Rewards ───────────────────────────────────────────────
 
 export const demoRewards: Reward[] = demoMemberships
-  .filter(m => m.rewardsEarned > 0)
-  .map(m => ({
+  .filter((m: Membership) => m.rewardsEarned > 0)
+  .map((m: Membership) => ({
     id: `rew_${m.id}`,
     membershipId: m.id,
     programId: m.programId,
@@ -294,14 +294,14 @@ export const demoDashboardStats: DashboardStats = {
 
 // ── Program Stats ─────────────────────────────────────────
 
-export const demoProgramStats: ProgramWithStats[] = demoPrograms.map(prog => {
-  const members = demoMemberships.filter(m => m.programId === prog.id);
+export const demoProgramStats: ProgramWithStats[] = demoPrograms.map((prog: LoyaltyProgram) => {
+  const members = demoMemberships.filter((m: Membership) => m.programId === prog.id);
   return {
     ...prog,
     totalMembers: members.length,
-    totalVisits: members.reduce((sum, m) => sum + m.totalVisits, 0),
-    totalRedemptions: members.reduce((sum, m) => sum + m.rewardsRedeemed, 0),
-    activeMembers: members.filter(m => m.status === 'active').length,
+    totalVisits: members.reduce((sum: number, m: Membership) => sum + m.totalVisits, 0),
+    totalRedemptions: members.reduce((sum: number, m: Membership) => sum + m.rewardsRedeemed, 0),
+    activeMembers: members.filter((m: Membership) => m.status === 'active').length,
   };
 });
 
@@ -336,8 +336,8 @@ export const demoProgramDistribution = [
 // ── Actionable Insights ───────────────────────────────────
 
 export const demoInsights = {
-  nearReward: demoMemberships.filter(m => {
-    const prog = demoPrograms.find(p => p.id === m.programId);
+  nearReward: demoMemberships.filter((m: Membership) => {
+    const prog = demoPrograms.find((p: LoyaltyProgram) => p.id === m.programId);
     if (!prog) return false;
     if (prog.programType === 'visits') return m.currentVisits === prog.goalValue - 1;
     if (prog.programType === 'points') return m.currentPoints >= prog.goalValue * 0.9;

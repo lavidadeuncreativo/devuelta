@@ -5,13 +5,14 @@ import { motion } from 'framer-motion';
 import { Smartphone, CheckCircle2 } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useAppStore } from '@/lib/store';
+import { Membership, LoyaltyProgram, Customer, Reward } from '@/lib/types';
 
 export default function PassViewPage({ params }: { params: Promise<{ serial: string }> }) {
   const { serial } = use(params);
   const { memberships, programs, customers, business } = useAppStore();
 
   // Find membership by serial or ID
-  const membership = memberships.find(m => m.passSerial === serial || m.id === serial);
+  const membership = memberships.find((m: Membership) => m.passSerial === serial || m.id === serial);
   
   if (!membership) {
     return (
@@ -24,15 +25,15 @@ export default function PassViewPage({ params }: { params: Promise<{ serial: str
     );
   }
 
-  const program = programs.find(p => p.id === membership.programId);
-  const customer = customers.find(c => c.id === membership.customerId);
+  const program = programs.find((p: LoyaltyProgram) => p.id === membership.programId);
+  const customer = customers.find((c: Customer) => c.id === membership.customerId);
 
   if (!program || !customer || !business) {
     return <div className="min-h-screen flex items-center justify-center">Error al cargar datos del pase</div>;
   }
 
   const currentVal = membership.currentVisits;
-  const rewardAvailable = currentVal >= program.goalValue || useAppStore.getState().rewards.some(r => r.membershipId === membership.id && r.status === 'available');
+  const rewardAvailable = currentVal >= program.goalValue || useAppStore.getState().rewards.some((r: Reward) => r.membershipId === membership.id && r.status === 'available');
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 relative">

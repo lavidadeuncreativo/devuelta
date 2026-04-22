@@ -48,7 +48,7 @@ export function DigitalPassCard({
 }: DigitalPassCardProps) {
   const progress = getProgressPercentage(currentValue, goalValue);
   const isVisitType = programType === 'visits';
-  const stamps = isVisitType ? Array.from({ length: goalValue }, (_, i) => i < currentValue) : [];
+  const stamps = isVisitType ? Array.from({ length: goalValue }, (_: any, i: number) => i < currentValue) : [];
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);

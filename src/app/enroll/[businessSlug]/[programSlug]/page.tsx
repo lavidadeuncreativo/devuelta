@@ -185,11 +185,11 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
           <h2 className="text-base font-semibold text-center">Únete al programa</h2>
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Nombre</label>
-            <input type="text" className="input-field" placeholder="Tu nombre completo" value={name} onChange={e => setName(e.target.value)} required />
+            <input type="text" className="input-field" placeholder="Tu nombre completo" value={name} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)} required />
           </div>
           <div>
             <label className="block text-xs font-medium text-[var(--color-text-secondary)] mb-1.5">Teléfono o email</label>
-            <input type="text" className="input-field" placeholder="+52 55 1234 5678" value={contact} onChange={e => setContact(e.target.value)} required />
+            <input type="text" className="input-field" placeholder="+52 55 1234 5678" value={contact} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setContact(e.target.value)} required />
           </div>
           <label className="flex items-start gap-2 text-xs text-[var(--color-text-secondary)]">
             <input type="checkbox" required className="rounded border-[var(--color-border)] mt-0.5" />
