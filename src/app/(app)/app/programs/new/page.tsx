@@ -4,19 +4,18 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import {
-  Star, ArrowRight, ArrowLeft, Check, Gift,
+  Star, ArrowLeft, Check, Gift,
   Coffee, Scissors, Sparkles, UtensilsCrossed,
   Croissant, Dumbbell, ShoppingBag, PawPrint,
-  Eye, Palette, FileText,
+  Eye, Palette, type LucideIcon,
 } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { programTemplates } from '@/lib/demo/templates';
-import { cn, getBusinessTypeLabel } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import type { ProgramTemplate } from '@/lib/types';
-import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
 import { useAppStore } from '@/lib/store';
 
-const iconMap: Record<string, React.ElementType> = {
+const iconMap: Record<string, LucideIcon> = {
   Coffee, Scissors, Sparkles, UtensilsCrossed, Croissant, Dumbbell, ShoppingBag, PawPrint,
 };
 
@@ -100,7 +99,7 @@ export default function NewProgramPage() {
 
       {/* Step indicators */}
       <div className="flex items-center gap-2 mb-8">
-        {steps.map((step: { id: string; label: string; icon: any }, i: number) => (
+        {steps.map((step: { id: string; label: string; icon: LucideIcon }, i: number) => (
           <div key={step.id} className="flex items-center gap-2">
             <button
               onClick={() => i <= currentStep && setCurrentStep(i)}

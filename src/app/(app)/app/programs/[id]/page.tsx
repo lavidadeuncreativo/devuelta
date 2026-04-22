@@ -1,11 +1,9 @@
 'use client';
 
-import { use, useState, useEffect } from 'react';
+import { use, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useRouter } from 'next/navigation';
-import { ArrowLeft, Users, Eye, Gift, Star, QrCode, Share2, Settings, Pause, X, Save, Sparkles } from 'lucide-react';
+import { ArrowLeft, Users, Eye, Gift, Star, QrCode, Share2, Settings, Pause, X, Save, Sparkles, type LucideIcon } from 'lucide-react';
 import Link from 'next/link';
-import { demoPrograms, demoMemberships } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { getProgramTypeLabel } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
@@ -16,7 +14,6 @@ import { QRCodeSVG } from 'qrcode.react';
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
-  const router = useRouter();
   const { programs, memberships, business } = useAppStore();
   
   const initialProgram = programs.find((p: LoyaltyProgram) => p.id === id) || programs[0];
@@ -25,11 +22,6 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
   const [isEditing, setIsEditing] = useState(false);
   const [showQRModal, setShowQRModal] = useState(false);
   const [programData, setProgramData] = useState<LoyaltyProgram>(initialProgram);
-  
-  // Sync state if initialProgram changes (e.g., after a save or load)
-  useEffect(() => {
-    if (initialProgram) setProgramData(initialProgram);
-  }, [initialProgram]);
 
   const members = memberships.filter((m: Membership) => m.programId === initialProgram?.id);
   const totalVisits = members.reduce((s: number, m: Membership) => s + m.totalVisits, 0);
@@ -65,8 +57,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
           {currentProgram.dynamicType === 'giveaway' && !isEditing && (
             <GiveawayControlCenter 
               programId={id} 
-              rewardDetail={currentProgram.rewardDetail} 
-              programName={currentProgram.name}
+              rewardDetail={currentProgram.rewardDetail}
             />
           )}
 
@@ -112,7 +103,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
                 { icon: Eye, label: 'Visitas', value: totalVisits, color: '#f59e0b' },
                 { icon: Gift, label: 'Canjes', value: totalRedemptions, color: '#ec4899' },
                 { icon: Star, label: 'Activos', value: members.filter((m: Membership) => m.status === 'active').length, color: '#6366f1' },
-              ].map((s: { icon: any, label: string, value: number, color: string }, i: number) => (
+              ].map((s: { icon: LucideIcon; label: string; value: number; color: string }, i: number) => (
                 <motion.div key={i} className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + i * 0.05 }}>
                   <div className="w-8 h-8 rounded-lg mx-auto mb-2 flex items-center justify-center" style={{ background: `${s.color}15` }}>
                     <s.icon size={14} style={{ color: s.color }} />
@@ -284,7 +275,7 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
   );
 }
 
-function GiveawayControlCenter({ programId, rewardDetail, programName }: { programId: string, rewardDetail: string, programName: string }) {
+function GiveawayControlCenter({ programId, rewardDetail }: { programId: string; rewardDetail: string }) {
   const { customers, memberships, performSorteo } = useAppStore();
   const [isDrawing, setIsDrawing] = useState(false);
   const [shuffleName, setShuffleName] = useState<string | null>(null);
@@ -301,16 +292,18 @@ function GiveawayControlCenter({ programId, rewardDetail, programName }: { progr
     // Shuffle animation
     const duration = 2500;
     const interval = 80;
-    const startTime = Date.now();
+    const maxIterations = Math.ceil(duration / interval);
+    let iteration = 0;
 
     const shuffleInterval = setInterval(() => {
       const randomMember = participants[Math.floor(Math.random() * participants.length)];
       const customer = customers.find((c: Customer) => c.id === randomMember.customerId);
       setShuffleName(customer?.fullName || 'Anon');
       
-      if (Date.now() - startTime > duration) {
+      iteration += 1;
+      if (iteration >= maxIterations) {
         clearInterval(shuffleInterval);
-        finalizeDraw();
+        void finalizeDraw();
       }
     }, interval);
   };

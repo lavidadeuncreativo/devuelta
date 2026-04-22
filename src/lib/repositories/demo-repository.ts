@@ -34,7 +34,7 @@ export class DemoProgramRepository implements IProgramRepository {
     useAppStore.getState().updateProgram(id, updates);
     return (await this.getById(id))!;
   }
-  async delete(id: string) { /* Not implemented for demo */ }
+  async delete(id: string) { void id; /* Not implemented for demo */ }
 }
 
 export class DemoCustomerRepository implements ICustomerRepository {
@@ -49,6 +49,8 @@ export class DemoCustomerRepository implements ICustomerRepository {
     return customers[customers.length - 1];
   }
   async update(id: string, updates: Partial<Customer>) {
+    void id;
+    void updates;
     /* Need updateCustomer in store if we want real edits, but let's stick to base for now */
     return (await this.getById(id))!;
   }
@@ -67,6 +69,7 @@ export class DemoMembershipRepository implements IMembershipRepository {
   async getById(id: string) { return useAppStore.getState().memberships.find((m: Membership) => m.id === id) || null; }
   async getBySerial(serial: string) { return useAppStore.getState().memberships.find((m: Membership) => m.passSerial === serial) || null; }
   async getByCustomer(customerId: string) { return useAppStore.getState().memberships.filter((m: Membership) => m.customerId === customerId); }
+  async getByProgramId(programId: string) { return useAppStore.getState().memberships.filter((m: Membership) => m.programId === programId); }
   async create(data: Omit<Membership, 'id' | 'enrolledAt'>) {
     useAppStore.getState().addMembership(data);
     const memberships = useAppStore.getState().memberships;
@@ -118,6 +121,7 @@ export class DemoLocationRepository implements ILocationRepository {
     return locations[locations.length - 1];
   }
   async update(id: string, updates: Partial<Location>) {
+    void updates;
     /* Need updateLocation in store */
     return useAppStore.getState().locations.find((l: Location) => l.id === id)!;
   }

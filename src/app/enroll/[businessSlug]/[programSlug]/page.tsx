@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { Check, ArrowRight, Smartphone } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useAppStore } from '@/lib/store';
-import { DemoProgramRepository, DemoCustomerRepository, DemoMembershipRepository } from '@/lib/repositories/demo-repository';
+import { DemoCustomerRepository, DemoMembershipRepository } from '@/lib/repositories/demo-repository';
 import { DemoWalletAdapter } from '@/lib/wallet/demo-adapter';
 import { LoyaltyProgram } from '@/lib/types';
 
@@ -41,7 +41,7 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
     const serial = `ps_${Date.now()}`;
 
     // 2. Create membership
-    const membership = await membershipRepo.create({
+    await membershipRepo.create({
       customerId: customer.id,
       programId: program.id,
       businessId: targetBusiness.id,
@@ -130,7 +130,7 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
               Agregar a Google Wallet
             </button>
             <p className="text-xs text-[var(--color-text-muted)] mt-4">
-              ✨ Membresía registrada con éxito.
+              Membresía registrada con éxito.
             </p>
           </div>
         </motion.div>

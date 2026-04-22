@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  LayoutDashboard, Star, Users, Zap, BarChart3,
+  LayoutDashboard, Star, Users, BarChart3,
   Settings, ChevronLeft, ChevronRight, LogOut,
   QrCode, Bell, Search, Menu, X, Megaphone, LucideIcon,
 } from 'lucide-react';

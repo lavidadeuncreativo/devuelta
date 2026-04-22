@@ -2,10 +2,12 @@ import { Navbar } from '@/components/landing/Navbar';
 import { HeroSection } from '@/components/landing/HeroSection';
 import {
   ProblemSection,
+  ProofSection,
   HowItWorksSection,
   UseCasesSection,
   PassDemoSection,
   BenefitsSection,
+  ComparisonSection,
   TestimonialSection,
   PricingSection,
   FAQSection,
@@ -20,11 +22,13 @@ export default function HomePage() {
       <HeroSection />
       <div className="divider-gradient" />
       <ProblemSection />
+      <ProofSection />
       <HowItWorksSection />
       <UseCasesSection />
       <PassDemoSection />
       <div className="divider-gradient" />
       <BenefitsSection />
+      <ComparisonSection />
       <TestimonialSection />
       <PricingSection />
       <FAQSection />

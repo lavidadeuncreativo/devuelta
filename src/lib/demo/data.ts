@@ -5,7 +5,7 @@
 
 import type {
   Business, Location, User, LoyaltyProgram, Customer,
-  Membership, Visit, Reward, Redemption, ActivityItem,
+  Membership, Reward, ActivityItem,
   DashboardStats, ProgramWithStats,
 } from '@/lib/types';
 
@@ -227,21 +227,21 @@ function makeMembership(
 
 export const demoMemberships: Membership[] = [
   // Program 1: Café de Vuelta (5 visits goal) — most popular
-  ...Array.from({ length: 20 }, (_: any, i: number) => {
+  ...Array.from({ length: 20 }, (_, i: number) => {
     const visits = [4, 3, 5, 2, 1, 4, 3, 5, 2, 3, 4, 1, 5, 2, 3, 4, 5, 1, 2, 3][i];
     const earned = [0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0][i];
     const redeemed = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0][i];
     return makeMembership(i, 0, visits % 5, 0, earned, redeemed);
   }),
   // Program 2: Corte Frecuente (4 visits goal)
-  ...Array.from({ length: 12 }, (_: any, i: number) => {
+  ...Array.from({ length: 12 }, (_, i: number) => {
     const visits = [3, 2, 4, 1, 3, 2, 4, 1, 3, 2, 1, 4][i];
     const earned = [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1][i];
     const redeemed = [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0][i];
     return makeMembership(i + 5, 1, visits % 4, 0, earned, redeemed);
   }),
   // Program 3: Puntos Premium (50 points goal)
-  ...Array.from({ length: 10 }, (_: any, i: number) => {
+  ...Array.from({ length: 10 }, (_, i: number) => {
     const points = [45, 30, 50, 12, 38, 22, 50, 8, 41, 15][i];
     const earned = points >= 50 ? 1 : 0;
     const redeemed = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0][i];

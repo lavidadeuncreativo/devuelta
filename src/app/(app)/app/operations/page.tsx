@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -51,17 +51,19 @@ export default function OperationsPage() {
     auditRepo
   );
 
-  useEffect(() => {
-    if (searchQuery.length >= 3) {
-      handleSearch();
-    } else {
+  const handleSearch = async (query: string) => {
+    if (query.length < 3) {
       setSearchResults([]);
+      return;
     }
-  }, [searchQuery]);
 
-  const handleSearch = async () => {
-    const results = await customerRepo.search(searchQuery);
+    const results = await customerRepo.search(query);
     setSearchResults(results);
+  };
+
+  const handleSearchChange = async (query: string) => {
+    setSearchQuery(query);
+    await handleSearch(query);
   };
 
   const handleSelectCustomer = async (customer: Customer) => {
@@ -71,12 +73,14 @@ export default function OperationsPage() {
     
     // Load memberships
     const memberships = await membershipRepo.getByCustomer(customer.id);
-    const enriched = await Promise.all(memberships.map(async (m: Membership) => {
+    const enriched: MembershipWithDetails[] = (await Promise.all(memberships.map(async (m: Membership) => {
       const program = await programRepo.getById(m.programId);
+      if (!program) return null;
+
       const rewards = await rewardRepo.getByMembership(m.id);
-      return { ...m, customer, program: program!, rewards };
-    }));
-    
+      return { ...m, customer, program, rewards };
+    }))).filter((membership): membership is MembershipWithDetails => membership !== null);
+
     setCustomerMemberships(enriched);
     if (enriched.length > 0) {
       setSelectedMembership(enriched[0]);
@@ -152,7 +156,9 @@ export default function OperationsPage() {
               className="input-field pl-10 h-12 text-base"
               placeholder="Nombre, teléfono o email..."
               value={searchQuery}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                void handleSearchChange(e.target.value);
+              }}
             />
             
             {/* Search Results Dropdown */}
@@ -236,7 +242,9 @@ export default function OperationsPage() {
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
-                        <span className="text-[var(--color-text-secondary)]">Progreso: {m.currentVisits}/{m.program.goalValue}</span>
+                        <span className="text-[var(--color-text-secondary)]">
+                          Progreso: {m.program.programType === 'points' ? m.currentPoints : m.currentVisits}/{m.program.goalValue}
+                        </span>
                         {m.rewards.some((r: Reward) => r.status === 'available') && (
                           <span className="flex items-center gap-1 text-emerald-400 font-bold animate-pulse">
                             <Gift size={12} /> ¡Canje listo!

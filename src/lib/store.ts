@@ -63,7 +63,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persist(
-    (set: any) => ({
+    (set, get) => ({
       business: demoBusiness,
       programs: demoPrograms,
       customers: demoCustomers,
@@ -162,7 +162,7 @@ export const useAppStore = create<AppState>()(
       })),
 
       performSorteo: async (programId: string) => {
-        const state = useAppStore.getState();
+        const state = get();
         const program = state.programs.find((p: LoyaltyProgram) => p.id === programId);
         if (!program || program.dynamicType !== 'giveaway') return null;
 

@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Trophy, Megaphone, Calendar, ArrowRight, User } from 'lucide-react';
+import { Sparkles, Trophy, Megaphone, Calendar, User } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { Customer, Membership } from '@/lib/types';
 

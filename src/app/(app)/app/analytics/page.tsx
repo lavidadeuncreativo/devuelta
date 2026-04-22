@@ -2,17 +2,16 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, CreditCard, Eye, Gift, TrendingUp,
-  Target, ArrowUpRight, Calendar,
+  Users, Eye, Gift, TrendingUp,
+  Target, Calendar,
   Zap, BarChart3, Download, Mail, Filter, CheckCircle2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
-import { getProgramTypeLabel } from '@/lib/utils';
 import { Membership, Visit, Redemption, LoyaltyProgram, Customer, Location as BranchLocation } from '@/lib/types';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  BarChart as ReBarChart, Bar, PieChart, Pie, Cell,
+  PieChart, Pie, Cell,
 } from 'recharts';
 
 export default function AnalyticsPage() {
@@ -28,11 +27,6 @@ export default function AnalyticsPage() {
 
   const filteredVisits: Visit[] = visits.filter((v: Visit) => {
     const d = new Date(v.createdAt);
-    return d >= limit;
-  });
-
-  const filteredMemberships: Membership[] = memberships.filter((m: Membership) => {
-    const d = new Date(m.enrolledAt);
     return d >= limit;
   });
 
@@ -432,6 +426,7 @@ function InsightCard({ icon: Icon, label, value, customValue, suffix, detail, co
         <p className="text-xl font-bold mb-1">{display}{suffix}</p>
       )}
       <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider leading-tight">{label}</p>
+      <p className="mt-2 text-xs text-[var(--color-text-secondary)] leading-relaxed">{detail}</p>
     </motion.div>
   );
 }

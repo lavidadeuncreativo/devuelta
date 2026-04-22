@@ -2,24 +2,16 @@
 
 import { motion } from 'framer-motion';
 import { Search, UserPlus, Star, Gift, ChevronRight, Users as UsersIcon } from 'lucide-react';
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { formatRelativeTime } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import { Customer, Membership } from '@/lib/types';
 
 function CustomersList() {
   const searchParams = useSearchParams();
   const { customers, memberships } = useAppStore();
-  const [query, setQuery] = useState('');
-
-  useEffect(() => {
-    const search = searchParams.get('search');
-    if (search) {
-      setQuery(search);
-    }
-  }, [searchParams]);
+  const [query, setQuery] = useState(() => searchParams.get('search') ?? '');
 
   const filtered = query
     ? customers.filter((c: Customer) =>

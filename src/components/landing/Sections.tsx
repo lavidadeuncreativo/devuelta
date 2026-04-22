@@ -9,18 +9,11 @@ import {
   ShoppingBag, Dumbbell, PawPrint, Croissant,
   ArrowRight, Check, ChevronDown, Gift,
   Shield, Clock, Globe,
+  type LucideIcon,
 } from 'lucide-react';
 import Link from 'next/link';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { cn } from '@/lib/utils';
-
-// ── Shared animation helpers ──
-
-const fadeUp = {
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] },
-};
 
 function SectionTitle({ badge, title, subtitle, centered = true }: {
   badge?: string; title: string; subtitle?: string; centered?: boolean;
@@ -84,7 +77,7 @@ export function ProblemSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-6">
-          {problems.map((item: { icon: any; text: string }, i: number) => (
+          {problems.map((item: { icon: LucideIcon; text: string }, i: number) => (
             <motion.div
               key={i}
               className="card-surface p-6 flex flex-col items-start gap-4"
@@ -98,6 +91,67 @@ export function ProblemSection() {
               <p className="text-[var(--color-text-secondary)] leading-relaxed text-[0.9375rem]">{item.text}</p>
             </motion.div>
           ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function ProofSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
+  const highlights = [
+    {
+      value: '3 clics',
+      title: 'para registrar una visita',
+      description: 'Diseñado para mostrador. El equipo no se distrae y el cliente entiende el avance en segundos.',
+    },
+    {
+      value: '0 apps',
+      title: 'que el cliente tenga que descargar',
+      description: 'La promesa comercial es más fuerte porque la experiencia vive en herramientas que ya usa diario.',
+    },
+    {
+      value: '1 panel',
+      title: 'para operar, medir y optimizar',
+      description: 'Programas, clientes, recompensas y analytics en una sola experiencia coherente.',
+    },
+  ];
+
+  return (
+    <section ref={ref} className="py-20 sm:py-24 relative">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10">
+        <div className="glass rounded-[2rem] p-6 sm:p-10 border border-[var(--color-border)] shadow-[0_30px_80px_-50px_oklch(0.6_0.18_165_/_0.45)]">
+          <div className="grid gap-6 lg:grid-cols-[1.1fr_1.6fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-brand)] mb-4">
+                Diseñado para venderse
+              </p>
+              <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-balance">
+                No es una demo bonita. Es una experiencia que ya explica su valor sola.
+              </h2>
+              <p className="mt-4 text-base sm:text-lg text-[var(--color-text-secondary)] leading-relaxed">
+                La landing, el onboarding, el panel y el pase comunican la misma idea: menos fricción, más retorno, más claridad para negocio y cliente.
+              </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {highlights.map((item, i) => (
+                <motion.div
+                  key={item.title}
+                  className="rounded-2xl bg-[var(--color-bg-secondary)] border border-[var(--color-border-subtle)] p-5"
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.08 + i * 0.08 }}
+                >
+                  <p className="text-3xl font-bold tracking-tight text-[var(--color-brand)]">{item.value}</p>
+                  <p className="mt-2 text-sm font-semibold leading-snug">{item.title}</p>
+                  <p className="mt-3 text-sm text-[var(--color-text-secondary)] leading-relaxed">{item.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -144,7 +198,7 @@ export function HowItWorksSection() {
         />
 
         <div className="grid md:grid-cols-3 gap-8">
-          {steps.map((step: { number: string; icon: any; title: string; description: string }, i: number) => (
+          {steps.map((step: { number: string; icon: LucideIcon; title: string; description: string }, i: number) => (
             <motion.div
               key={i}
               className="relative"
@@ -202,7 +256,7 @@ export function UseCasesSection() {
         />
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {cases.map((item: { icon: any; label: string; example: string; color: string }, i: number) => (
+          {cases.map((item: { icon: LucideIcon; label: string; example: string; color: string }, i: number) => (
             <motion.div
               key={i}
               className="card-interactive p-5 text-center group"
@@ -322,7 +376,7 @@ export function BenefitsSection() {
         />
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {benefits.map((item: { icon: any; title: string; description: string; color: string }, i: number) => (
+          {benefits.map((item: { icon: LucideIcon; title: string; description: string; color: string }, i: number) => (
             <motion.div
               key={i}
               className="card-surface p-6"
@@ -338,6 +392,63 @@ export function BenefitsSection() {
               </div>
               <h3 className="text-base font-semibold mb-2">{item.title}</h3>
               <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">{item.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function ComparisonSection() {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: '-80px' });
+
+  const comparison = [
+    {
+      legacy: 'Tarjeta física que se pierde, se moja o se olvida.',
+      devuelta: 'Pase digital listo para abrir desde el celular y visible en el wallet.',
+    },
+    {
+      legacy: 'El negocio no sabe qué cliente vuelve ni qué programa funciona.',
+      devuelta: 'Cada cliente, visita y recompensa queda centralizada para medir retorno.',
+    },
+    {
+      legacy: 'El staff improvisa y el proceso se vuelve inconsistente.',
+      devuelta: 'La operación se vuelve repetible, rápida y fácil de enseñar.',
+    },
+    {
+      legacy: 'La experiencia se siente barata aunque la marca sea premium.',
+      devuelta: 'La presentación del pase refuerza percepción de valor y profesionalismo.',
+    },
+  ];
+
+  return (
+    <section ref={ref} className="py-24 sm:py-32 relative">
+      <div className="max-w-6xl mx-auto px-6 sm:px-10">
+        <SectionTitle
+          badge="Antes y después"
+          title="La diferencia entre una promo improvisada y un sistema serio de retención."
+          subtitle="Tu producto se vende mejor cuando el negocio siente control y el cliente percibe valor desde la primera interacción."
+        />
+
+        <div className="grid gap-4">
+          {comparison.map((item, i) => (
+            <motion.div
+              key={item.legacy}
+              className="grid gap-4 rounded-[1.5rem] border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4 sm:p-6 lg:grid-cols-2"
+              initial={{ opacity: 0, y: 18 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.45, delay: 0.05 + i * 0.06 }}
+            >
+              <div className="rounded-2xl bg-[oklch(0.97_0.01_25)] p-4 border border-[oklch(0.91_0.02_25)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-text-muted)] mb-2">Sin DeVuelta</p>
+                <p className="text-sm sm:text-base text-[var(--color-text-secondary)] leading-relaxed">{item.legacy}</p>
+              </div>
+              <div className="rounded-2xl bg-[var(--color-brand-subtle)]/50 p-4 border border-[var(--color-border-brand)]">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[var(--color-brand)] mb-2">Con DeVuelta</p>
+                <p className="text-sm sm:text-base leading-relaxed">{item.devuelta}</p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -394,7 +505,7 @@ export function TestimonialSection() {
             >
               {/* Stars */}
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_: any, j: number) => (
+                {[...Array(5)].map((_, j: number) => (
                   <Star key={j} size={14} className="text-amber-400 fill-amber-400" />
                 ))}
               </div>
@@ -631,6 +742,18 @@ export function FinalCTASection() {
             Sin tarjeta de crédito. Sin compromiso.
           </p>
 
+          <div className="mb-8 grid gap-3 sm:grid-cols-3 text-left">
+            {[
+              'Landing clara para cerrar demos y ventas.',
+              'Onboarding corto para que el negocio vea valor rápido.',
+              'Panel listo para operar sin capacitación pesada.',
+            ].map((item) => (
+              <div key={item} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)]/75 px-4 py-3 text-sm text-[var(--color-text-secondary)]">
+                {item}
+              </div>
+            ))}
+          </div>
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup" className="btn-primary text-base !py-3 !px-8 group">
               Comenzar gratis
@@ -678,5 +801,3 @@ export function Footer() {
     </footer>
   );
 }
-
-
