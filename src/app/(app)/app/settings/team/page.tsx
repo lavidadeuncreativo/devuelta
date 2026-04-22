@@ -23,7 +23,7 @@ export default function TeamSettingsPage() {
         {users.map((user, i) => (
           <motion.div key={user.id} className="card-surface p-5 flex items-center gap-4" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
             <div className="w-10 h-10 rounded-full gradient-brand flex items-center justify-center text-sm font-bold text-white/90">
-              {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              {user.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1">
               <p className="text-sm font-medium">{user.fullName}</p>

@@ -81,7 +81,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
             animate={{ opacity: 1, y: 0 }}
           >
             <div className="w-14 h-14 rounded-full bg-[var(--color-brand-subtle)] flex items-center justify-center text-xl font-bold text-[var(--color-brand)]">
-              {customer.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              {customer.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1">
               <h1 className="text-xl font-bold">{customer.fullName}</h1>

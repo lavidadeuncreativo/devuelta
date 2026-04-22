@@ -74,7 +74,7 @@ function CustomersList() {
                 className="flex items-center gap-4 px-5 py-4 hover:bg-[var(--color-bg-tertiary)] transition-colors group"
               >
                 <div className="w-10 h-10 rounded-full bg-[var(--color-bg-tertiary)] flex items-center justify-center text-sm font-bold text-[var(--color-text-secondary)] group-hover:bg-[var(--color-brand-subtle)] group-hover:text-[var(--color-brand)] transition-colors">
-                  {customer.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  {customer.fullName.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{customer.fullName}</p>
