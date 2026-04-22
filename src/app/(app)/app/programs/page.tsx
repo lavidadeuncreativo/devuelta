@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Plus, Star, Users, Eye, Gift, ArrowUpRight } from 'lucide-react';
+import { Plus, Star, Users, Eye, Gift, ArrowUpRight, X } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
 

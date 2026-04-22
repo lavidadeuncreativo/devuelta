@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Users, Eye, Gift, Star, QrCode, Share2, Settings, Pause, X, Save } from 'lucide-react';
+import { ArrowLeft, Users, Eye, Gift, Star, QrCode, Share2, Settings, Pause, X, Save, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { demoPrograms, demoMemberships } from '@/lib/demo/data';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';

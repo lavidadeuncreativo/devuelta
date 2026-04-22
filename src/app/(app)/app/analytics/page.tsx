@@ -9,7 +9,7 @@ import {
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/lib/store';
 import { getProgramTypeLabel } from '@/lib/utils';
-import { Membership, Visit, Redemption, LoyaltyProgram, Location as BranchLocation } from '@/lib/types';
+import { Membership, Visit, Redemption, LoyaltyProgram, Customer, Location as BranchLocation } from '@/lib/types';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
   BarChart as ReBarChart, Bar, PieChart, Pie, Cell,
