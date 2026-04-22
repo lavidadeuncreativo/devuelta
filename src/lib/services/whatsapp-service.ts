@@ -62,6 +62,8 @@ export class WhatsAppService {
         ]}
       ]
     });
+  }
+
   /**
    * Helper to send a winner notification for giveaways
    */
