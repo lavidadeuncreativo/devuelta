@@ -11,6 +11,7 @@ import { getProgramTypeLabel } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import { DemoProgramRepository } from '@/lib/repositories/demo-repository';
 import { Membership, LoyaltyProgram, Customer } from '@/lib/types';
+import { QRCodeSVG } from 'qrcode.react';
 
 export default function ProgramDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
