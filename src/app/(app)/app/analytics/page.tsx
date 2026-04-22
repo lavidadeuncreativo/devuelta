@@ -62,7 +62,7 @@ export default function AnalyticsPage() {
       const m = memberships.find((mem: Membership) => mem.id === v.membershipId);
       return m?.programId === p.id;
     }).length
-  })).sort((a,b) => b.count - a.count);
+  })).sort((a: { count: number }, b: { count: number }) => b.count - a.count);
   const mostActiveProgram = programActivity[0]?.name || 'Ninguno';
 
   // 2. Chart Data: Distribution
@@ -70,7 +70,7 @@ export default function AnalyticsPage() {
     name: p.name,
     value: memberships.filter((m: Membership) => m.programId === p.id).length,
     color: ['#7c3aed', '#ec4899', '#f59e0b', '#6366f1', '#10b981'][i % 5]
-  })).filter(p => p.value > 0);
+  })).filter((p: { value: number }) => p.value > 0);
 
   // 3. Chart Data: Locations
   const locationStats = locations.map((l: BranchLocation) => ({
@@ -110,7 +110,7 @@ export default function AnalyticsPage() {
     // Basic CSV generation
     const headers = ['ID Cliente', 'Email', 'Programa', 'Visitas Actuales', 'Total Visitas', 'Fecha Registro'];
     const rows = memberships.map((m: Membership) => {
-      const customer = useAppStore.getState().customers.find(c => c.id === m.customerId);
+      const customer = useAppStore.getState().customers.find((c: Customer) => c.id === m.customerId);
       const program = programs.find((p: LoyaltyProgram) => p.id === m.programId);
       return [
         m.customerId,
