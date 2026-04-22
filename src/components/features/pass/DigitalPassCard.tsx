@@ -13,6 +13,7 @@ interface DigitalPassCardProps {
   goalValue: number;
   rewardDetail: string;
   programType: 'visits' | 'points' | 'fixed_reward';
+  dynamicType?: 'loyalty' | 'giveaway';
   bgColor?: string;
   textColor?: string;
   rewardAvailable?: boolean;
@@ -33,6 +34,7 @@ export function DigitalPassCard({
   goalValue,
   rewardDetail,
   programType,
+  dynamicType = 'loyalty',
   bgColor = '#1a1a2e',
   textColor = '#f0e6d3',
   rewardAvailable = false,
@@ -282,7 +284,7 @@ export function DigitalPassCard({
                   <AnimatedCounter value={currentValue} animated={animated} />
                 </motion.span>
                 <span className="text-sm ml-1" style={{ color: `${textColor}66` }}>
-                  / {goalValue} pts
+                  / {goalValue} {dynamicType === 'giveaway' ? 'boletos' : 'pts'}
                 </span>
               </div>
               <span
@@ -345,7 +347,7 @@ export function DigitalPassCard({
               className="text-xs font-medium uppercase tracking-wider mb-0.5"
               style={{ color: `${textColor}60` }}
             >
-              {rewardAvailable ? 'Recompensa disponible' : 'Tu siguiente recompensa'}
+              {rewardAvailable ? (dynamicType === 'giveaway' ? '¡Has ganado!' : 'Recompensa disponible') : (dynamicType === 'giveaway' ? 'Próximo Sorteo' : 'Tu siguiente recompensa')}
             </p>
             <p className={cn('font-semibold truncate', compact ? 'text-sm' : 'text-base')}>
               {rewardDetail}

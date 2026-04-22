@@ -62,5 +62,21 @@ export class WhatsAppService {
         ]}
       ]
     });
+  /**
+   * Helper to send a winner notification for giveaways
+   */
+  static async sendWinnerNotification(phone: string, customerName: string, prize: string, cardName: string) {
+    return this.sendMessage({
+      to: phone,
+      templateName: 'giveaway_winner',
+      language: 'es_MX',
+      components: [
+        { type: 'body', parameters: [
+          { type: 'text', text: customerName },
+          { type: 'text', text: prize },
+          { type: 'text', text: cardName }
+        ]}
+      ]
+    });
   }
 }

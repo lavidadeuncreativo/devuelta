@@ -148,4 +148,55 @@ export class LoyaltyService {
 
     return { success: true, message: '¡Recompensa canjeada con éxito!' };
   }
+
+  /**
+   * Performs a weighted random draw for a giveaway tarjeta.
+   */
+  async performDraw(programId: string): Promise<{ success: boolean; winnerId?: string; winnerName?: string; message: string }> {
+    const program = await this.programs.getById(programId);
+    if (!program || program.dynamicType !== 'giveaway') {
+      return { success: false, message: 'La tarjeta no es de tipo sorteo.' };
+    }
+
+    const memberships = await this.memberships.getByProgramId(programId);
+    const activeParticipants = memberships.filter(m => m.currentVisits > 0);
+
+    if (activeParticipants.length === 0) {
+      return { success: false, message: 'No hay participantes con boletos acumulados.' };
+    }
+
+    // 1. Create a weighted pool
+    // Each currentVisit counts as 1 ticket
+    const pool: string[] = [];
+    activeParticipants.forEach(member => {
+      for (let i = 0; i < member.currentVisits; i++) {
+        pool.push(member.id);
+      }
+    });
+
+    // 2. Pick a random winner ID from the pool
+    const winnerMembershipId = pool[Math.floor(Math.random() * pool.length)];
+    const winnerMembership = activeParticipants.find(m => m.id === winnerMembershipId)!;
+
+    // 3. Get winner details
+    // In demo, we might need to fetch the customer
+    const customer = await useAppStore.getState().customers.find(c => c.id === winnerMembership.customerId);
+    
+    // 4. Notify winner (WhatsApp Mock)
+    if (customer?.phone) {
+      WhatsAppService.sendWinnerNotification(
+        customer.phone,
+        customer.fullName,
+        program.rewardDetail,
+        program.name
+      ).catch(err => console.error('Error sending WA winner notification:', err));
+    }
+
+    return { 
+      success: true, 
+      winnerId: winnerMembership.customerId,
+      winnerName: customer?.fullName || 'Cliente Anónimo',
+      message: `¡Sorteo realizado! Ganador: ${customer?.fullName || 'ID ' + winnerMembership.customerId}`
+    };
+  }
 }

@@ -57,6 +57,7 @@ interface AppState {
   addAuditLog: (log: Omit<AuditLog, 'id' | 'createdAt'>) => void;
   setUsers: (users: User[]) => void;
   addUser: (user: Omit<User, 'id' | 'createdAt'>) => void;
+  performSorteo: (programId: string) => Promise<{ winnerName: string; winnerId: string } | null>;
   resetDemoData: () => void;
 }
 
@@ -159,6 +160,38 @@ export const useAppStore = create<AppState>()(
       addUser: (data) => set((state) => ({
         users: [...state.users, { ...data, id: `usr_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
+
+      performSorteo: async (programId) => {
+        const state = useAppStore.getState();
+        const program = state.programs.find(p => p.id === programId);
+        if (!program || program.dynamicType !== 'giveaway') return null;
+
+        const memberships = state.memberships.filter(m => m.programId === programId && m.currentVisits > 0);
+        if (memberships.length === 0) return null;
+
+        // Weighted pool
+        const pool: string[] = [];
+        memberships.forEach(m => {
+          for (let i = 0; i < m.currentVisits; i++) {
+            pool.push(m.customerId);
+          }
+        });
+
+        const winnerId = pool[Math.floor(Math.random() * pool.length)];
+        const winner = state.customers.find(c => c.id === winnerId);
+
+        if (winner && winner.phone) {
+          const { WhatsAppService } = await import('./services/whatsapp-service');
+          WhatsAppService.sendWinnerNotification(
+            winner.phone,
+            winner.fullName,
+            program.rewardDetail,
+            program.name
+          ).catch(console.error);
+        }
+
+        return winner ? { winnerName: winner.fullName, winnerId: winner.id } : null;
+      },
 
       resetDemoData: () => set({
         business: demoBusiness,

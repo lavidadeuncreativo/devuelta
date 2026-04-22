@@ -61,6 +61,15 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
 
       <div className="grid lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
+          {/* Sorteo Control Center (Only for Giveaway type) */}
+          {currentProgram.dynamicType === 'giveaway' && !isEditing && (
+            <GiveawayControlCenter 
+              programId={id} 
+              rewardDetail={currentProgram.rewardDetail} 
+              programName={currentProgram.name}
+            />
+          )}
+
           {/* Header */}
           <motion.div
             className="card-surface p-6 relative overflow-hidden"
@@ -272,5 +281,147 @@ export default function ProgramDetailPage({ params }: { params: Promise<{ id: st
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function GiveawayControlCenter({ programId, rewardDetail, programName }: { programId: string, rewardDetail: string, programName: string }) {
+  const { customers, memberships, performSorteo } = useAppStore();
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [shuffleName, setShuffleName] = useState<string | null>(null);
+  const [winner, setWinner] = useState<{ name: string; id: string } | null>(null);
+
+  const participants = memberships.filter(m => m.programId === programId && m.currentVisits > 0);
+  const totalTickets = participants.reduce((acc, m) => acc + m.currentVisits, 0);
+
+  const handleStartDraw = async () => {
+    if (participants.length === 0) return;
+    setIsDrawing(true);
+    setWinner(null);
+
+    // Shuffle animation
+    const duration = 2500;
+    const interval = 80;
+    const startTime = Date.now();
+
+    const shuffleInterval = setInterval(() => {
+      const randomMember = participants[Math.floor(Math.random() * participants.length)];
+      const customer = customers.find(c => c.id === randomMember.customerId);
+      setShuffleName(customer?.fullName || 'Anon');
+      
+      if (Date.now() - startTime > duration) {
+        clearInterval(shuffleInterval);
+        finalizeDraw();
+      }
+    }, interval);
+  };
+
+  const finalizeDraw = async () => {
+    const result = await performSorteo(programId);
+    if (result) {
+      setWinner({ name: result.winnerName, id: result.winnerId });
+    }
+    setIsDrawing(false);
+    setShuffleName(null);
+  };
+
+  return (
+    <motion.div 
+      className="card-surface p-6 border-2 border-amber-500/20 bg-gradient-to-br from-[var(--color-bg-primary)] to-amber-500/5"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-500">
+            <Star size={20} className="fill-amber-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">Panel de Sorteo</h3>
+            <p className="text-xs text-[var(--color-text-secondary)]">Elige un ganador entre tus participantes</p>
+          </div>
+        </div>
+        <div className="text-right">
+          <p className="text-2xl font-bold text-amber-500">{totalTickets}</p>
+          <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">Boletos en juego</p>
+        </div>
+      </div>
+
+      <div className="bg-[var(--color-bg-secondary)] rounded-2xl p-8 mb-6 flex flex-col items-center justify-center min-h-[200px] border border-[var(--color-border-subtle)] relative overflow-hidden">
+        {/* Background glow when drawing */}
+        <AnimatePresence>
+          {isDrawing && (
+            <motion.div 
+              className="absolute inset-0 bg-amber-500/10 pointer-events-none"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+          )}
+        </AnimatePresence>
+
+        {isDrawing ? (
+          <div className="text-center">
+            <motion.div 
+              animate={{ scale: [1, 1.1, 1] }} 
+              transition={{ repeat: Infinity, duration: 0.5 }}
+              className="text-2xl font-bold text-amber-400 mb-2"
+            >
+              Mezclando boletos...
+            </motion.div>
+            <div className="text-4xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-[var(--color-text-muted)]">
+              {shuffleName}
+            </div>
+          </div>
+        ) : winner ? (
+          <motion.div 
+            className="text-center"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: 'spring' }}
+          >
+            <div className="flex justify-center mb-4">
+              <div className="w-16 h-16 rounded-full gradient-brand flex items-center justify-center shadow-[0_0_20px_rgba(var(--color-brand-rgb),0.5)]">
+                <Gift size={32} className="text-white" />
+              </div>
+            </div>
+            <p className="text-amber-500 font-bold uppercase tracking-widest text-xs mb-1">¡Ganador seleccionado!</p>
+            <h4 className="text-3xl font-black mb-2">{winner.name}</h4>
+            <div className="badge badge-brand mb-4">Premio: {rewardDetail}</div>
+            
+            <div className="flex gap-2 justify-center">
+              <button onClick={() => setWinner(null)} className="btn-ghost text-xs">
+                Cerrar
+              </button>
+              <button onClick={handleStartDraw} className="btn-secondary !py-1 text-xs">
+                Sortear de nuevo
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500 mx-auto">
+              <Gift size={30} />
+            </div>
+            <div className="max-w-xs mx-auto">
+              <p className="text-sm text-[var(--color-text-secondary)] mb-6">
+                Hay {participants.length} personas participando con un total de {totalTickets} boletos registrados.
+              </p>
+              <button 
+                onClick={handleStartDraw}
+                disabled={participants.length === 0}
+                className="btn-primary !py-3 !px-8 text-lg font-bold w-full disabled:opacity-50"
+              >
+                ¡Realizar Sorteo!
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] justify-center">
+        <Sparkles size={12} className="text-amber-500" />
+        Cada boleto representa una oportunidad (sorteo ponderado)
+      </div>
+    </motion.div>
   );
 }
