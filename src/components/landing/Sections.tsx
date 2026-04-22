@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
+import { cn } from '@/lib/utils';
 
 // ── Shared animation helpers ──
 
