@@ -12,7 +12,7 @@ import { formatRelativeTime } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import { demoActivity } from '@/lib/demo/data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
-import { Visit, Membership, Customer, LoyaltyProgram, BranchLocation } from '@/lib/types';
+import { Visit, Membership, Customer, LoyaltyProgram, Location as BranchLocation } from '@/lib/types';
 
 // Helper to get visits in a timeframe
 const getVisitsByTimeframe = (visits: Visit[], days: number, buckets: number) => {
