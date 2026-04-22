@@ -1,22 +1,19 @@
-'use client';
-
-import { useState } from 'react';
-import { motion } from 'framer-motion';
 import { Sparkles, Trophy, Megaphone, Calendar, ArrowRight, User } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
+import { Customer, Membership } from '@/lib/types';
 
 export default function MarketingPage() {
   const { customers, memberships } = useAppStore();
 
   // Basic aggregation for Customer of the Week
-  const sortedCustomers = [...customers].sort((a, b) => {
-    const visitsA = memberships.filter(m => m.customerId === a.id).reduce((s, m) => s + m.totalVisits, 0);
-    const visitsB = memberships.filter(m => m.customerId === b.id).reduce((s, m) => s + m.totalVisits, 0);
+  const sortedCustomers = [...customers].sort((a: Customer, b: Customer) => {
+    const visitsA = memberships.filter((m: Membership) => m.customerId === a.id).reduce((s: number, m: Membership) => s + m.totalVisits, 0);
+    const visitsB = memberships.filter((m: Membership) => m.customerId === b.id).reduce((s: number, m: Membership) => s + m.totalVisits, 0);
     return visitsB - visitsA;
   });
 
   const customerOfTheWeek = sortedCustomers[0];
-  const covVisits = customerOfTheWeek ? memberships.filter(m => m.customerId === customerOfTheWeek.id).reduce((s, m) => s + m.totalVisits, 0) : 0;
+  const covVisits = customerOfTheWeek ? memberships.filter((m: Membership) => m.customerId === customerOfTheWeek.id).reduce((s: number, m: Membership) => s + m.totalVisits, 0) : 0;
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto space-y-8">

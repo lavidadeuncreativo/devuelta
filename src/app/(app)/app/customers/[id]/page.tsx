@@ -11,7 +11,7 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useState, useEffect } from 'react';
 import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
 import { LoyaltyService } from '@/lib/services/loyalty-service';
-import { MembershipWithDetails } from '@/lib/types';
+import { MembershipWithDetails, Membership, LoyaltyProgram, Customer } from '@/lib/types';
 
 export default function CustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -20,18 +20,18 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const [customerMemberships, setCustomerMemberships] = useState<MembershipWithDetails[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const customer = customers.find((c) => c.id === id) || customers[0];
+  const customer = customers.find((c: Customer) => c.id === id) || customers[0];
 
   // Logic to enrichment memberships
   useEffect(() => {
     if (customer) {
-      const mems = allMemberships.filter((m) => m.customerId === customer.id);
-      const enriched = mems.map(m => ({
+      const mems = allMemberships.filter((m: Membership) => m.customerId === customer.id);
+      const enriched = mems.map((m: Membership) => ({
         ...m,
         customer,
-        program: programs.find(p => p.id === m.programId)!,
-        rewards: useAppStore.getState().rewards.filter(r => r.membershipId === m.id)
-      })).filter(m => m.program);
+        program: programs.find((p: LoyaltyProgram) => p.id === m.programId)!,
+        rewards: useAppStore.getState().rewards.filter((r: any) => r.membershipId === m.id)
+      })).filter((m: any) => m.program);
       setCustomerMemberships(enriched);
     }
   }, [customer, allMemberships, programs]);
@@ -109,11 +109,11 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           {/* Stats */}
           <div className="grid grid-cols-3 gap-4">
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-              <p className="text-2xl font-bold">{customerMemberships.reduce((s, m) => s + m.totalVisits, 0)}</p>
+              <p className="text-2xl font-bold">{customerMemberships.reduce((s: number, m: MembershipWithDetails) => s + m.totalVisits, 0)}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Total visitas</p>
             </motion.div>
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
-              <p className="text-2xl font-bold">{customerMemberships.reduce((s, m) => s + m.rewardsRedeemed, 0)}</p>
+              <p className="text-2xl font-bold">{customerMemberships.reduce((s: number, m: MembershipWithDetails) => s + m.rewardsRedeemed, 0)}</p>
               <p className="text-xs text-[var(--color-text-muted)] mt-1">Recompensas</p>
             </motion.div>
             <motion.div className="card-surface p-4 text-center" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
@@ -126,7 +126,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <div>
             <h2 className="text-sm font-semibold mb-4">Programas activos</h2>
             <div className="space-y-4">
-              {customerMemberships.map((mem, idx) => {
+              {customerMemberships.map((mem: MembershipWithDetails, idx: number) => {
                 const prog = mem.program;
                 const isVisits = prog.programType === 'visits';
                 const current = mem.currentVisits;
@@ -169,11 +169,11 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           <div>
             <h2 className="text-sm font-semibold mb-4">Actividad reciente</h2>
             <div className="space-y-1">
-              {auditLogs.filter(l => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id)).length > 0
+              {auditLogs.filter((l: any) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id)).length > 0
                 ? auditLogs
-                    .filter(l => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id))
-                    .sort((a,b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .map(log => (
+                    .filter((l: any) => l.entityId === selectedMembership?.id || (l.entityType === 'membership' && l.metadata?.membershipId === selectedMembership?.id))
+                    .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((log: any) => (
                   <div key={log.id} className="flex items-start gap-3 px-3 py-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors">
                     <div className={`w-7 h-7 rounded-lg flex items-center justify-center mt-0.5 ${
                       log.action === 'RECORD_VISIT' ? 'bg-amber-500/15' :
@@ -214,7 +214,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 programType={selectedMembership.program.programType}
                 bgColor={selectedMembership.program.passBgColor}
                 textColor={selectedMembership.program.passTextColor}
-                rewardAvailable={selectedMembership.rewards.some(r => r.status === 'available')}
+                rewardAvailable={selectedMembership.rewards.some((r: any) => r.status === 'available')}
                 animated={true}
               />
             )}
@@ -233,10 +233,10 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
                 </button>
                 <button 
                   onClick={() => handleAction('redeem')}
-                  disabled={isProcessing || !selectedMembership.rewards.some(r => r.status === 'available')}
+                  disabled={isProcessing || !selectedMembership.rewards.some((r: any) => r.status === 'available')}
                   className={cn(
                     "btn-secondary w-full justify-center text-sm disabled:opacity-50",
-                    selectedMembership.rewards.some(r => r.status === 'available') ? "animate-pulse" : ""
+                    selectedMembership.rewards.some((r: any) => r.status === 'available') ? "animate-pulse" : ""
                   )}
                 >
                   <Gift size={14} />

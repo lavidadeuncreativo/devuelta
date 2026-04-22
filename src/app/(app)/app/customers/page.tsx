@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { formatRelativeTime } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
+import { Customer, Membership } from '@/lib/types';
 
 function CustomersList() {
   const searchParams = useSearchParams();
@@ -21,7 +22,7 @@ function CustomersList() {
   }, [searchParams]);
 
   const filtered = query
-    ? customers.filter(c =>
+    ? customers.filter((c: Customer) =>
         c.fullName.toLowerCase().includes(query.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(query.toLowerCase())) ||
         (c.phone && c.phone.includes(query))
@@ -57,10 +58,10 @@ function CustomersList() {
 
       {/* Customer list */}
       <div className="card-surface divide-y divide-[var(--color-border-subtle)]">
-        {filtered.map((customer, i) => {
-          const mems = memberships.filter(m => m.customerId === customer.id);
-          const totalVisits = mems.reduce((s, m) => s + m.totalVisits, 0);
-          const rewards = mems.reduce((s, m) => s + m.rewardsEarned, 0);
+        {filtered.map((customer: Customer, i: number) => {
+          const mems = memberships.filter((m: Membership) => m.customerId === customer.id);
+          const totalVisits = mems.reduce((s: number, m: Membership) => s + m.totalVisits, 0);
+          const rewards = mems.reduce((s: number, m: Membership) => s + m.rewardsEarned, 0);
 
           return (
             <motion.div

@@ -7,6 +7,7 @@ import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { useAppStore } from '@/lib/store';
 import { DemoProgramRepository, DemoCustomerRepository, DemoMembershipRepository } from '@/lib/repositories/demo-repository';
 import { DemoWalletAdapter } from '@/lib/wallet/demo-adapter';
+import { LoyaltyProgram } from '@/lib/types';
 
 export default function EnrollPage({ params }: { params: Promise<{ businessSlug: string; programSlug: string }> }) {
   const { businessSlug, programSlug } = use(params);
@@ -19,7 +20,7 @@ export default function EnrollPage({ params }: { params: Promise<{ businessSlug:
 
   // Find business and program from slugs
   const targetBusiness = business?.slug === businessSlug ? business : null;
-  const program = programs.find(p => p.slug === programSlug);
+  const program = programs.find((p: LoyaltyProgram) => p.slug === programSlug);
 
   const handleEnroll = async (e: React.FormEvent) => {
     e.preventDefault();

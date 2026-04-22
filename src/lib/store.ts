@@ -79,10 +79,10 @@ export const useAppStore = create<AppState>()(
         useLocalOnly: true,
       },
 
-      setBusiness: (business) => set({ business }),
+      setBusiness: (business: Business) => set({ business }),
 
-      updateProgram: (id, updates) => set((state) => ({
-        programs: state.programs.map((p) => (p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p))
+      updateProgram: (id: string, updates: Partial<LoyaltyProgram>) => set((state: AppState) => ({
+        programs: state.programs.map((p: LoyaltyProgram) => (p.id === id ? { ...p, ...updates, updatedAt: new Date().toISOString() } : p))
       })),
 
       addProgram: (data) => set((state) => ({
@@ -94,8 +94,8 @@ export const useAppStore = create<AppState>()(
         }]
       })),
       
-      removeProgram: (id) => set((state) => ({
-        programs: state.programs.filter((p) => p.id !== id)
+      removeProgram: (id: string) => set((state: AppState) => ({
+        programs: state.programs.filter((p: LoyaltyProgram) => p.id !== id)
       })),
 
       addCustomer: (data) => set((state) => ({
@@ -115,8 +115,8 @@ export const useAppStore = create<AppState>()(
         }]
       })),
 
-      updateMembership: (id, updates) => set((state) => ({
-        memberships: state.memberships.map((m) => (m.id === id ? { ...m, ...updates } : m))
+      updateMembership: (id: string, updates: Partial<Membership>) => set((state: AppState) => ({
+        memberships: state.memberships.map((m: Membership) => (m.id === id ? { ...m, ...updates } : m))
       })),
 
       addVisitRecord: (data) => set((state) => ({
@@ -127,8 +127,8 @@ export const useAppStore = create<AppState>()(
         rewards: [...state.rewards, { ...data, id: `rwd_${Date.now()}`, unlockedAt: new Date().toISOString() }]
       })),
 
-      updateRewardRecord: (id, updates) => set((state) => ({
-        rewards: state.rewards.map((r) => (r.id === id ? { ...r, ...updates } : r))
+      updateRewardRecord: (id: string, updates: Partial<Reward>) => set((state: AppState) => ({
+        rewards: state.rewards.map((r: Reward) => (r.id === id ? { ...r, ...updates } : r))
       })),
 
       addRedemptionRecord: (data) => set((state) => ({
@@ -143,12 +143,12 @@ export const useAppStore = create<AppState>()(
         }]
       })),
 
-      updateLocation: (id, updates) => set((state) => ({
-        locations: state.locations.map((l) => (l.id === id ? { ...l, ...updates } : l))
+      updateLocation: (id: string, updates: Partial<BranchLocation>) => set((state: AppState) => ({
+        locations: state.locations.map((l: BranchLocation) => (l.id === id ? { ...l, ...updates } : l))
       })),
 
-      removeLocation: (id) => set((state) => ({
-        locations: state.locations.filter((l) => l.id !== id)
+      removeLocation: (id: string) => set((state: AppState) => ({
+        locations: state.locations.filter((l: BranchLocation) => l.id !== id)
       })),
 
       addAuditLog: (data) => set((state) => ({
@@ -161,24 +161,24 @@ export const useAppStore = create<AppState>()(
         users: [...state.users, { ...data, id: `usr_${Date.now()}`, createdAt: new Date().toISOString() }]
       })),
 
-      performSorteo: async (programId) => {
+      performSorteo: async (programId: string) => {
         const state = useAppStore.getState();
-        const program = state.programs.find(p => p.id === programId);
+        const program = state.programs.find((p: LoyaltyProgram) => p.id === programId);
         if (!program || program.dynamicType !== 'giveaway') return null;
 
-        const memberships = state.memberships.filter(m => m.programId === programId && m.currentVisits > 0);
+        const memberships = state.memberships.filter((m: Membership) => m.programId === programId && m.currentVisits > 0);
         if (memberships.length === 0) return null;
 
         // Weighted pool
         const pool: string[] = [];
-        memberships.forEach(m => {
+        memberships.forEach((m: Membership) => {
           for (let i = 0; i < m.currentVisits; i++) {
             pool.push(m.customerId);
           }
         });
 
         const winnerId = pool[Math.floor(Math.random() * pool.length)];
-        const winner = state.customers.find(c => c.id === winnerId);
+        const winner = state.customers.find((c: Customer) => c.id === winnerId);
 
         if (winner && winner.phone) {
           const { WhatsAppService } = await import('./services/whatsapp-service');

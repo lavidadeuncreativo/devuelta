@@ -12,9 +12,10 @@ import { formatRelativeTime } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import { demoActivity } from '@/lib/demo/data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
+import { Visit, Membership, Customer, LoyaltyProgram, BranchLocation } from '@/lib/types';
 
 // Helper to get visits in a timeframe
-const getVisitsByTimeframe = (visits: any[], days: number, buckets: number) => {
+const getVisitsByTimeframe = (visits: Visit[], days: number, buckets: number) => {
   const result = [];
   const now = new Date();
   for (let i = buckets - 1; i >= 0; i--) {
@@ -24,7 +25,7 @@ const getVisitsByTimeframe = (visits: any[], days: number, buckets: number) => {
     if (days === 1) { // Daily
       const hour = now.getHours() - i;
       label = `${hour}:00`;
-      count = visits.filter(v => {
+      count = visits.filter((v: Visit) => {
         const d = new Date(v.createdAt);
         return d.getHours() === hour && d.getDate() === now.getDate();
       }).length;
@@ -32,13 +33,13 @@ const getVisitsByTimeframe = (visits: any[], days: number, buckets: number) => {
       const d = new Date();
       d.setDate(d.getDate() - i);
       label = d.toLocaleDateString('es-MX', { weekday: 'short' });
-      count = visits.filter(v => {
+      count = visits.filter((v: Visit) => {
         const vd = new Date(v.createdAt);
         return vd.toDateString() === d.toDateString();
       }).length;
     } else { // Monthly (4 weeks)
       label = `Sem ${4-i}`;
-      count = visits.filter(v => {
+      count = visits.filter((v: Visit) => {
         const vd = new Date(v.createdAt);
         const diff = (now.getTime() - vd.getTime()) / (1000 * 60 * 60 * 24 * 7);
         return diff >= i && diff < i + 1;
@@ -53,16 +54,16 @@ export default function DashboardPage() {
   const { customers, memberships, programs, locations } = useAppStore();
   const [chartView, setChartView] = useState<'daily'|'weekly'|'monthly'>('weekly');
 
-  const totalVisits = memberships.reduce((acc, m) => acc + m.totalVisits, 0);
-  const totalRewards = memberships.reduce((acc, m) => acc + m.rewardsRedeemed, 0);
+  const totalVisits = memberships.reduce((acc: number, m: Membership) => acc + m.totalVisits, 0);
+  const totalRewards = memberships.reduce((acc: number, m: Membership) => acc + m.rewardsRedeemed, 0);
 
   // Computar Cliente de la semana (más visitas en últimos 7 días)
-  const sortedByVisits = [...memberships].sort((a, b) => b.totalVisits - a.totalVisits);
+  const sortedByVisits = [...memberships].sort((a: Membership, b: Membership) => b.totalVisits - a.totalVisits);
   const topMember = sortedByVisits[0];
-  const customerOfTheWeek = topMember ? customers.find(c => c.id === topMember.customerId) : null;
+  const customerOfTheWeek = topMember ? customers.find((c: Customer) => c.id === topMember.customerId) : null;
 
   // Computar Cliente del mes (simulado con más visitas totales por ahora)
-  const customerOfTheMonth = sortedByVisits[1] ? customers.find(c => c.id === sortedByVisits[1].customerId) : null;
+  const customerOfTheMonth = sortedByVisits[1] ? customers.find((c: Customer) => c.id === sortedByVisits[1].customerId) : null;
 
   const currentChartData = getVisitsByTimeframe(
     useAppStore.getState().visits,
@@ -91,7 +92,7 @@ export default function DashboardPage() {
           {customerOfTheWeek ? (
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold text-xl border border-amber-500/30">
-                {customerOfTheWeek.fullName.split(' ').map(n=>n[0]).join('')}
+                {customerOfTheWeek.fullName.split(' ').map((n: string)=>n[0]).join('')}
               </div>
               <div>
                 <p className="text-lg font-bold">{customerOfTheWeek.fullName}</p>
@@ -112,7 +113,7 @@ export default function DashboardPage() {
           {customerOfTheMonth ? (
             <div className="flex items-center gap-4">
               <div className="w-14 h-14 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center font-bold text-xl border border-purple-500/30">
-                {customerOfTheMonth.fullName.split(' ').map(n=>n[0]).join('')}
+                {customerOfTheMonth.fullName.split(' ').map((n: string)=>n[0]).join('')}
               </div>
               <div>
                 <p className="text-lg font-bold">{customerOfTheMonth.fullName}</p>
@@ -155,7 +156,7 @@ export default function DashboardPage() {
               Visitas de clientes
             </h3>
             <div className="flex bg-[var(--color-bg-primary)] rounded-lg p-1 border border-[var(--color-border-subtle)]">
-              {(['daily', 'weekly', 'monthly'] as const).map(view => (
+              {(['daily', 'weekly', 'monthly'] as const).map((view: string) => (
                 <button
                   key={view}
                   onClick={() => setChartView(view)}
@@ -201,7 +202,7 @@ export default function DashboardPage() {
                 { icon: Star, label: 'Buscar cliente y Registrar', href: '/app/customers', color: '#f59e0b' },
                 { icon: Gift, label: 'Redimir recompensa', href: '/app/customers', color: '#ec4899' },
                 { icon: BarChart3, label: 'Ver analytics', href: '/app/analytics', color: '#8b5cf6' },
-              ].map((action, i) => (
+              ].map((action: { icon: any, label: string, href: string, color: string }, i: number) => (
                 <Link
                   key={i}
                   href={action.href}
@@ -228,9 +229,9 @@ export default function DashboardPage() {
             <Star size={15} className="text-[var(--color-brand)]" /> Rendimiento por Tarjeta
           </h3>
           <div className="space-y-3">
-            {programs.map((prog, i) => {
-              const pMems = memberships.filter(m => m.programId === prog.id);
-              const pVisits = pMems.reduce((s, m) => s + m.totalVisits, 0);
+            {programs.map((prog: LoyaltyProgram, i: number) => {
+              const pMems = memberships.filter((m: Membership) => m.programId === prog.id);
+              const pVisits = pMems.reduce((s: number, m: Membership) => s + m.totalVisits, 0);
               return (
                 <motion.div key={prog.id} className="card-surface p-4 flex items-center justify-between" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                   <div>
@@ -252,7 +253,7 @@ export default function DashboardPage() {
             <MapPin size={15} className="text-[var(--color-brand)]" /> Tráfico por Sucursal
           </h3>
           <div className="space-y-3">
-            {locations.length > 0 ? locations.map((loc, i) => (
+            {locations.length > 0 ? locations.map((loc: BranchLocation, i: number) => (
               <motion.div key={loc.id} className="card-surface p-4 flex items-center justify-between" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
                 <div>
                   <h4 className="font-semibold text-sm">{loc.name}</h4>

@@ -210,7 +210,7 @@ export function DigitalPassCard({
               goalValue <= 8 ? 'grid-cols-4' :
               'grid-cols-6'
             )}>
-              {stamps.map((filled, i) => (
+              {stamps.map((filled: boolean, i: number) => (
                 <motion.div
                   key={i}
                   className={cn(
