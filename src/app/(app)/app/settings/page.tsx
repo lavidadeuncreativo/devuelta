@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { ArrowLeft, Palette, MapPin, Users, Settings as SettingsIcon } from 'lucide-react';
+import { Palette, MapPin, Users, Settings as SettingsIcon, type LucideIcon } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { getBusinessTypeLabel } from '@/lib/utils';
 
@@ -24,7 +24,7 @@ export default function SettingsPage() {
           { href: '/app/settings/locations', icon: MapPin, label: 'Sucursales', desc: `${locations.length} sucursales configuradas`, color: '#f59e0b' },
           { href: '/app/settings/team', icon: Users, label: 'Equipo', desc: `${users.length} miembros del equipo`, color: '#6366f1' },
           { href: '#', icon: SettingsIcon, label: 'General', desc: 'Datos del negocio, timezone, moneda', color: '#ec4899' },
-        ].map((item: { href: string, icon: any, label: string, desc: string, color: string }, i: number) => (
+        ].map((item: { href: string; icon: LucideIcon; label: string; desc: string; color: string }, i: number) => (
           <motion.div key={i} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}>
             <Link href={item.href} className="card-interactive p-6 block">
               <div className="w-11 h-11 rounded-xl mb-4 flex items-center justify-center" style={{ background: `${item.color}15` }}>

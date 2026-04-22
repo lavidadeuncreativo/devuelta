@@ -6,7 +6,13 @@ export interface WhatsAppMessage {
   to: string;
   templateName: string;
   language: string;
-  components: any[];
+  components: Array<{
+    type: string;
+    parameters: Array<{
+      type: string;
+      text: string;
+    }>;
+  }>;
 }
 
 export class WhatsAppService {
@@ -21,7 +27,7 @@ export class WhatsAppService {
     console.log('-------------------------');
 
     // Simulate network delay
-    await new Promise((resolve: any) => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
 
     return {
       success: true,

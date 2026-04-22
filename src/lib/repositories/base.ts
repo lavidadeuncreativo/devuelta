@@ -32,6 +32,7 @@ export interface IMembershipRepository {
   getById(id: string): Promise<Membership | null>;
   getBySerial(serial: string): Promise<Membership | null>;
   getByCustomer(customerId: string): Promise<Membership[]>;
+  getByProgramId?(programId: string): Promise<Membership[]>;
   create(membership: Omit<Membership, 'id' | 'enrolledAt'>): Promise<Membership>;
   update(id: string, updates: Partial<Membership>): Promise<Membership>;
 }

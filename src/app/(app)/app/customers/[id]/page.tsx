@@ -2,14 +2,13 @@
 
 import { use } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Star, Gift, CheckCircle2, UserPlus, Mail, Phone, Calendar } from 'lucide-react';
+import { ArrowLeft, Star, Gift, UserPlus, Mail, Phone, Calendar } from 'lucide-react';
 import Link from 'next/link';
-import { demoActivity } from '@/lib/demo/data';
 import { useAppStore } from '@/lib/store';
 import { formatRelativeTime, getProgressPercentage, cn } from '@/lib/utils';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
-import { useState, useEffect } from 'react';
-import { DemoCustomerRepository, DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
+import { useState } from 'react';
+import { DemoMembershipRepository, DemoProgramRepository, DemoVisitRepository, DemoRewardRepository, DemoRedemptionRepository, DemoAuditRepository } from '@/lib/repositories/demo-repository';
 import { LoyaltyService } from '@/lib/services/loyalty-service';
 import { MembershipWithDetails, Membership, LoyaltyProgram, Customer, Reward, AuditLog } from '@/lib/types';
 
@@ -17,24 +16,27 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   const { id } = use(params);
   const { customers, memberships: allMemberships, programs, auditLogs, business } = useAppStore();
   const [selectedMembershipIdx, setSelectedMembershipIdx] = useState(0);
-  const [customerMemberships, setCustomerMemberships] = useState<MembershipWithDetails[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
 
   const customer = customers.find((c: Customer) => c.id === id) || customers[0];
+  const customerMemberships: MembershipWithDetails[] = customer
+    ? allMemberships
+        .filter((m: Membership) => m.customerId === customer.id)
+        .map((m: Membership) => {
+          const program = programs.find((p: LoyaltyProgram) => p.id === m.programId);
+          if (!program) return null;
 
-  // Logic to enrichment memberships
-  useEffect(() => {
-    if (customer) {
-      const mems = allMemberships.filter((m: Membership) => m.customerId === customer.id);
-      const enriched = mems.map((m: Membership) => ({
-        ...m,
-        customer,
-        program: programs.find((p: LoyaltyProgram) => p.id === m.programId)!,
-        rewards: useAppStore.getState().rewards.filter((r: Reward) => r.membershipId === m.id)
-      })).filter((m: any) => m.program);
-      setCustomerMemberships(enriched);
-    }
-  }, [customer, allMemberships, programs]);
+          return {
+            ...m,
+            customer,
+            program,
+            rewards: useAppStore.getState().rewards.filter((r: Reward) => r.membershipId === m.id),
+          };
+        })
+        .filter(
+          (membership: MembershipWithDetails | null): membership is MembershipWithDetails => membership !== null
+        )
+    : [];
 
   const selectedMembership = customerMemberships[selectedMembershipIdx];
 

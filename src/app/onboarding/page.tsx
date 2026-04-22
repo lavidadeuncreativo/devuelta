@@ -6,12 +6,12 @@ import { useRouter } from 'next/navigation';
 import {
   Coffee, Scissors, Sparkles, UtensilsCrossed, Croissant, Dumbbell,
   ShoppingBag, PawPrint, ArrowRight, ArrowLeft, Check, QrCode,
-  Star, Gift, UserPlus, Sparkle, Palette, Eye,
+  Star, Gift, UserPlus, Sparkle, Palette, Eye, type LucideIcon,
 } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 import { programTemplates } from '@/lib/demo/templates';
 import { cn, getBusinessTypeLabel } from '@/lib/utils';
-import { ProgramTemplate } from '@/lib/types';
+import { BusinessType, ProgramTemplate } from '@/lib/types';
 
 const businessTypes = [
   { type: 'cafeteria', icon: Coffee, color: '#f0e6d3', emoji: '☕' },
@@ -22,7 +22,7 @@ const businessTypes = [
   { type: 'fitness', icon: Dumbbell, color: '#7dd3fc', emoji: '💪' },
   { type: 'tienda', icon: ShoppingBag, color: '#a5b4fc', emoji: '🛍️' },
   { type: 'veterinaria', icon: PawPrint, color: '#86efac', emoji: '🐾' },
-];
+] as const satisfies ReadonlyArray<{ type: BusinessType; icon: LucideIcon; color: string; emoji: string }>;
 
 const stepsConfig = [
   { label: 'Tu giro', icon: Star },
@@ -67,7 +67,7 @@ export default function OnboardingPage() {
 
         {/* Progress bar */}
         <div className="flex items-center gap-1 mb-8 max-w-md mx-auto">
-          {stepsConfig.map((_: { label: string; icon: any }, i: number) => (
+          {stepsConfig.map((_: { label: string; icon: LucideIcon }, i: number) => (
             <div
               key={i}
               className={cn(
@@ -88,7 +88,7 @@ export default function OnboardingPage() {
                 Te prepararemos un programa de lealtad listo para usar.
               </p>
               <div className="grid grid-cols-2 gap-3 max-w-md mx-auto">
-                {businessTypes.map((biz: { type: string; icon: any; color: string; emoji: string }) => (
+                {businessTypes.map((biz) => (
                   <button
                     key={biz.type}
                     onClick={() => { setSelectedType(biz.type); next(); }}

@@ -10,7 +10,7 @@ Programas de lealtad digitales en Apple Wallet y Google Wallet, sin app propia.
 
 | Layer | Technology |
 |-------|-----------|
-| Framework | Next.js 16 (App Router, Turbopack) |
+| Framework | Next.js 16 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS v4 |
 | Motion | Framer Motion |
@@ -19,6 +19,23 @@ Programas de lealtad digitales en Apple Wallet y Google Wallet, sin app propia.
 | Forms | React Hook Form + Zod |
 | State | React Context |
 | Fonts | Inter + Instrument Serif |
+
+## ✅ Estado actual del proyecto
+
+La base visual y funcional está lista para demo, preventa y despliegue en Vercel:
+- `npm run build` compila correctamente
+- Landing pública mejorada con propuesta de valor más clara
+- Onboarding, dashboard, programas, clientes y operaciones corren en modo demo
+- El proyecto usa almacenamiento local/mock para demo, no backend multiusuario real todavía
+
+## ⚠️ Limitaciones antes de vender como SaaS fully-managed
+
+Estas piezas aún deben conectarse a infraestructura real antes de cobrar a múltiples negocios en producción:
+- autenticación real
+- persistencia real en base de datos
+- integración real de Apple Wallet / Google Wallet
+- integración real de WhatsApp / notificaciones
+- manejo multi-tenant y auditoría persistente
 
 ## 🚀 Cómo correr localmente
 
@@ -38,6 +55,25 @@ npm run dev
 ```
 
 Abre [http://localhost:3000](http://localhost:3000)
+
+## ▲ Deploy en Vercel
+
+El proyecto está configurado para construir con:
+
+```bash
+npm run build
+```
+
+Checklist recomendado para Vercel:
+
+1. Importa el repositorio en Vercel.
+2. Framework preset: `Next.js`.
+3. Build command: `npm run build`
+4. Install command: `npm install`
+5. Output directory: dejar vacío
+6. Configura las variables de entorno necesarias desde `.env.example`
+
+Si de momento solo quieres demo comercial, puede desplegarse sin Supabase siempre que no dependas de backend real.
 
 ## 📁 Estructura del proyecto
 
@@ -80,8 +116,9 @@ La app funciona completamente sin una instancia real de Supabase:
 - Auth simulada: login redirige al dashboard sin verificación
 - Datos demo: 30 clientes, 3 programas, 42 membresías, actividad realista
 - Wallet demo: botones de Apple/Google Wallet con mensajería clara
+- Persistencia local: los cambios viven en el navegador vía Zustand persist
 
-## 🔗 Conectar Supabase
+## 🔗 Conectar backend real
 
 1. Crea un proyecto en [supabase.com](https://supabase.com)
 2. Ejecuta el schema SQL en la base de datos

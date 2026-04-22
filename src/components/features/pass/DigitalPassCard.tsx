@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { Star, Gift, QrCode, ChevronRight, Check, Sparkles } from 'lucide-react';
+import { Star, Gift, QrCode, ChevronRight, Sparkles } from 'lucide-react';
 import { cn, getProgressPercentage } from '@/lib/utils';
 import { useState, useEffect } from 'react';
 
@@ -48,7 +48,7 @@ export function DigitalPassCard({
 }: DigitalPassCardProps) {
   const progress = getProgressPercentage(currentValue, goalValue);
   const isVisitType = programType === 'visits';
-  const stamps = isVisitType ? Array.from({ length: goalValue }, (_: any, i: number) => i < currentValue) : [];
+  const stamps = isVisitType ? Array.from({ length: goalValue }, (_, i: number) => i < currentValue) : [];
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -404,10 +404,12 @@ function AnimatedCounter({ value, animated }: { value: number; animated: boolean
 
   useEffect(() => {
     if (!animated) {
-      setDisplayValue(value);
-      return;
+      const frame = requestAnimationFrame(() => setDisplayValue(value));
+      return () => cancelAnimationFrame(frame);
     }
-    let start = 0;
+
+    const start = 0;
+    let frameId = 0;
     const duration = 1200;
     const startTime = performance.now();
 
@@ -416,10 +418,18 @@ function AnimatedCounter({ value, animated }: { value: number; animated: boolean
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 4);
       setDisplayValue(Math.round(start + (value - start) * eased));
-      if (progress < 1) requestAnimationFrame(tick);
+      if (progress < 1) {
+        frameId = requestAnimationFrame(tick);
+      }
     };
-    requestAnimationFrame(tick);
+
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
   }, [value, animated]);
+
+  if (!animated) {
+    return <>{value}</>;
+  }
 
   return <>{displayValue}</>;
 }

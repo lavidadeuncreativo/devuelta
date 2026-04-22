@@ -6,7 +6,8 @@ import {
   IAuditRepository,
   IProgramRepository
 } from '../repositories/base';
-import { Membership, LoyaltyProgram, Visit, Reward, Redemption } from '../types';
+import { useAppStore } from '../store';
+import { Membership, Reward, Customer } from '../types';
 import { WhatsAppService } from './whatsapp-service';
 
 export class LoyaltyService {
@@ -85,7 +86,19 @@ export class LoyaltyService {
     });
 
     // Trigger WhatsApp Notification
-    WhatsAppService.sendVisitNotification(membershipId, 'visit_recorded').catch(console.error);
+    const customer = useAppStore.getState().customers.find((item: Customer) => item.id === membership.customerId);
+
+    if (customer?.phone) {
+      const progress = program.programType === 'points'
+        ? `${updates.currentPoints ?? membership.currentPoints}/${program.goalValue} puntos`
+        : `${updates.currentVisits ?? membership.currentVisits}/${program.goalValue} visitas`;
+
+      const notification = rewardUnlocked
+        ? WhatsAppService.sendRewardNotification(customer.phone, customer.fullName, program.rewardDetail)
+        : WhatsAppService.sendVisitConfirmation(customer.phone, customer.fullName, program.name, progress);
+
+      notification.catch(console.error);
+    }
 
     return { 
       success: true, 
@@ -137,12 +150,14 @@ export class LoyaltyService {
     });
 
     // Trigger WhatsApp Notification
-    if (membership.id) {
+    const customer = useAppStore.getState().customers.find((item: Customer) => item.id === membership.customerId);
+
+    if (customer?.phone) {
        WhatsAppService.sendVisitConfirmation(
-         '5551234567', // Mock phone
-         'Cliente', 
-         'Tarjeta', 
-         'Progress'
+         customer.phone,
+         customer.fullName,
+         program.name,
+         'Recompensa canjeada'
        ).catch(console.error);
     }
 
@@ -158,7 +173,10 @@ export class LoyaltyService {
       return { success: false, message: 'La tarjeta no es de tipo sorteo.' };
     }
 
-    const memberships = await (this.memberships as any).getByProgramId(programId); // Cast for demo repo specific method
+    const memberships = await this.memberships.getByProgramId?.(programId);
+    if (!memberships) {
+      return { success: false, message: 'El repositorio actual no soporta sorteos por programa.' };
+    }
     const activeParticipants = memberships.filter((m: Membership) => m.currentVisits > 0);
 
     if (activeParticipants.length === 0) {
@@ -180,7 +198,7 @@ export class LoyaltyService {
 
     // 3. Get winner details
     // In demo, we might need to fetch the customer
-    const customer = await (useAppStore.getState().customers as Customer[]).find((c: Customer) => c.id === winnerMembership.customerId);
+    const customer = useAppStore.getState().customers.find((c: Customer) => c.id === winnerMembership.customerId);
     
     // 4. Notify winner (WhatsApp Mock)
     if (customer?.phone) {
@@ -189,7 +207,7 @@ export class LoyaltyService {
         customer.fullName,
         program.rewardDetail,
         program.name
-      ).catch((err: any) => console.error('Error sending WA winner notification:', err));
+      ).catch((err: unknown) => console.error('Error sending WA winner notification:', err));
     }
 
     return { 

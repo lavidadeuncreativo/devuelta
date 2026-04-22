@@ -2,15 +2,13 @@
 
 import { motion } from 'framer-motion';
 import {
-  Users, CreditCard, Eye, Gift, TrendingUp, Activity,
-  Plus, QrCode, Star, Zap, BarChart3, UserPlus,
-  ArrowRight, ArrowUpRight, CheckCircle2, Award, MapPin
+  Users, CreditCard, Eye, Gift, TrendingUp,
+  Plus, Star, Zap, BarChart3,
+  ArrowRight, Award, MapPin, type LucideIcon
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { formatRelativeTime } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
-import { demoActivity } from '@/lib/demo/data';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer } from 'recharts';
 import { Visit, Membership, Customer, LoyaltyProgram, Location as BranchLocation } from '@/lib/types';
 
@@ -202,7 +200,7 @@ export default function DashboardPage() {
                 { icon: Star, label: 'Buscar cliente y Registrar', href: '/app/customers', color: '#f59e0b' },
                 { icon: Gift, label: 'Redimir recompensa', href: '/app/customers', color: '#ec4899' },
                 { icon: BarChart3, label: 'Ver analytics', href: '/app/analytics', color: '#8b5cf6' },
-              ].map((action: { icon: any, label: string, href: string, color: string }, i: number) => (
+              ].map((action: { icon: LucideIcon; label: string; href: string; color: string }, i: number) => (
                 <Link
                   key={i}
                   href={action.href}

@@ -3,7 +3,7 @@
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Play } from 'lucide-react';
+import { ArrowRight, Play, CheckCircle2, TimerReset, WalletCards } from 'lucide-react';
 import { DigitalPassCard } from '@/components/features/pass/DigitalPassCard';
 
 export function HeroSection() {
@@ -67,10 +67,10 @@ export function HeroSection() {
               transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               <span className="block text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold tracking-[-0.03em] leading-[1.08]">
-                La tarjeta de lealtad que sus
+                Convierte visitas sueltas en
               </span>
               <span className="block text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-6xl font-bold tracking-[-0.03em] leading-[1.08] mt-1">
-                clientes <span className="font-display italic text-[var(--color-brand)]">amarán</span> cargar.
+                clientes que <span className="font-display italic text-[var(--color-brand)]">sí regresan</span>.
               </span>
             </motion.h1>
 
@@ -81,10 +81,10 @@ export function HeroSection() {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
             >
-              Reemplaza las tarjetas de cartón y las apps estorbosas por un pase digital elegante
-              en <span className="text-[var(--color-text)] font-medium">Apple Wallet</span> y{' '}
-              <span className="text-[var(--color-text)] font-medium">Google Wallet</span>.
-              Fideliza con un solo scan.
+              DeVuelta reemplaza tarjetas físicas, grupos improvisados y apps que nadie descarga
+              por un programa de lealtad premium en <span className="text-[var(--color-text)] font-medium">Apple Wallet</span> y{' '}
+              <span className="text-[var(--color-text)] font-medium">Google Wallet</span>. Tu equipo registra en segundos.
+              Tus clientes entienden el valor al instante.
             </motion.p>
 
             {/* CTAs */}
@@ -132,9 +132,43 @@ export function HeroSection() {
               </div>
               <div>
                 <p className="text-sm text-[var(--color-text-secondary)]">
-                  <span className="text-[var(--color-text)] font-semibold">+200 negocios</span> ya usan DeVuelta
+                  <span className="text-[var(--color-text)] font-semibold">Listo para onboarding, demo y venta</span>
+                  {' '}desde el primer día
                 </p>
               </div>
+            </motion.div>
+
+            <motion.div
+              className="mt-8 grid gap-3 sm:grid-cols-3"
+              initial={{ opacity: 0, y: 20 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.45, ease: [0.16, 1, 0.3, 1] }}
+            >
+              {[
+                {
+                  icon: TimerReset,
+                  label: 'Implementación rápida',
+                  detail: 'Programa activo en menos de 10 minutos',
+                },
+                {
+                  icon: WalletCards,
+                  label: 'Sin app propia',
+                  detail: 'El cliente lo guarda directo en su wallet',
+                },
+                {
+                  icon: CheckCircle2,
+                  label: 'Operación simple',
+                  detail: 'Staff capacitado en una sola sesión',
+                },
+              ].map((item) => (
+                <div key={item.label} className="glass rounded-2xl px-4 py-4 shadow-lg shadow-[color:oklch(0.65_0.18_165_/_0.06)]">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <item.icon size={16} className="text-[var(--color-brand)]" />
+                    <span>{item.label}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed">{item.detail}</p>
+                </div>
+              ))}
             </motion.div>
           </div>
 
