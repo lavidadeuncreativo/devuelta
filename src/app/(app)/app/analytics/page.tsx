@@ -22,21 +22,21 @@ export default function AnalyticsPage() {
   const [timeframe, setTimeframe] = useState('7d');
 
   // Filter helpers
-  const filterByTimeframe = <T extends { createdAt?: string; enrolledAt?: string; redeemedAt?: string }>(items: T[]): T[] => {
+  const filterByTimeframe = <T,>(items: T[], dateField: keyof T): T[] => {
     const now = new Date();
     const days = timeframe === '7d' ? 7 : timeframe === '30d' ? 30 : timeframe === '90d' ? 90 : 365;
     const limit = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
     
     return items.filter((item: T) => {
-      const dateStr = item.createdAt || item.enrolledAt || item.redeemedAt;
+      const dateStr = item[dateField] as unknown as string;
       if (!dateStr) return false;
       return new Date(dateStr) >= limit;
     });
   };
 
-  const filteredVisits = filterByTimeframe<Visit>(visits);
-  const filteredMemberships = filterByTimeframe<Membership>(memberships);
-  const filteredRedemptions = filterByTimeframe<Redemption>(redemptions);
+  const filteredVisits = filterByTimeframe(visits, 'createdAt');
+  const filteredMemberships = filterByTimeframe(memberships, 'enrolledAt');
+  const filteredRedemptions = filterByTimeframe(redemptions, 'redeemedAt');
 
   // ── Calculation Logic ──
   
