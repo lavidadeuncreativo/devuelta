@@ -9,14 +9,16 @@ import {
   Visit,
   Reward,
   Redemption,
-  AuditLog
+  AuditLog,
+  User
 } from './types';
 import { 
   demoPrograms, 
   demoCustomers, 
   demoMemberships, 
   demoLocations,
-  demoBusiness
+  demoBusiness,
+  demoUsers
 } from './demo/data';
 
 interface AppState {
