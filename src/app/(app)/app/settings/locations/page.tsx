@@ -5,7 +5,8 @@ import { ArrowLeft, MapPin, Plus, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { BranchLocation } from '@/lib/types';
+import { Location as BranchLocation } from '@/lib/types';
+import { useAppStore } from '@/lib/store';
 
 export default function LocationsSettingsPage() {
   const { locations, addLocation, updateLocation, removeLocation } = useAppStore();
